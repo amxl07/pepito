@@ -1,0 +1,361 @@
+/* Day 1 - Rose Day Styles */
+
+.container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: linear-gradient(135deg, #fff5f7 0%, #ffe8ed 50%, #ffd6e0 100%);
+    font-family: var(--font-playfair), serif;
+    padding: 20px;
+    overflow: hidden;
+    color: #444;
+}
+
+/* Background Petals */
+.petalsContainer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.petal {
+    position: absolute;
+    top: -50px;
+    font-size: 1.5rem;
+    animation: fall linear infinite;
+    opacity: 0.7;
+}
+
+@keyframes fall {
+    0% {
+        transform: translateY(-100px) rotate(0deg);
+        opacity: 0;
+    }
+
+    10% {
+        opacity: 0.7;
+    }
+
+    90% {
+        opacity: 0.7;
+    }
+
+    100% {
+        transform: translateY(110vh) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+/* ======= LAYOUT ======= */
+.layoutWrapper {
+    width: 100%;
+    max-width: 500px;
+    min-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 30px;
+    align-items: center;
+    z-index: 10;
+}
+
+/* 1. Header */
+.header {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.miniTitle {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #d14d4d;
+    opacity: 0.8;
+}
+
+.stageTitle {
+    font-size: 2.5rem;
+    color: #d14d4d;
+    margin-top: 5px;
+    font-weight: 400;
+}
+
+/* 2. Hero Content */
+.heroSection {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 0;
+}
+
+.seedPlaceholder {
+    width: 150px;
+    height: 150px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.seedIcon {
+    font-size: 4rem;
+}
+
+.seedText {
+    font-size: 0.9rem;
+    color: #888;
+    margin-top: 10px;
+}
+
+.photoFrame {
+    position: relative;
+    width: 100%;
+    max-width: 320px;
+    aspect-ratio: 4/5;
+    background: white;
+    padding: 15px;
+    border-radius: 20px;
+    /* Slight rounding but clean */
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+    /* Soft deep shadow */
+    transform: rotate(-2deg);
+    /* Artistic tilt */
+    margin-bottom: 30px;
+}
+
+.photo {
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    border-radius: 10px;
+}
+
+/* Caption Area */
+.captionWrapper {
+    text-align: center;
+    max-width: 400px;
+}
+
+.caption {
+    font-size: 1.3rem;
+    color: #444;
+    font-style: italic;
+    line-height: 1.4;
+    font-weight: 500;
+}
+
+.instruction {
+    font-size: 0.9rem;
+    color: #888;
+    margin-top: 10px;
+    font-family: var(--font-inter), sans-serif;
+    letter-spacing: 0.5px;
+}
+
+/* 3. Footer Controls */
+.controlsFooter {
+    width: 100%;
+    padding: 20px 0;
+    display: flex;
+    justify-content: center;
+}
+
+.controlsWrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.actionBtn {
+    background: linear-gradient(135deg, #ff6b6b, #d14d4d);
+    color: white;
+    padding: 12px 30px;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-family: var(--font-inter), sans-serif;
+    box-shadow: 0 10px 25px rgba(209, 77, 77, 0.4);
+    min-width: 160px;
+}
+
+.actionBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(209, 77, 77, 0.3);
+}
+
+.btnIcon {
+    font-size: 1.2rem;
+}
+
+/* Animations */
+.fadeIn {
+    animation: fadeIn 0.8s ease forwards;
+}
+
+.popIn {
+    animation: popIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes popIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+
+/* Final Reveal Page */
+.finalWrapper {
+    text-align: center;
+    width: 100%;
+    max-width: 600px;
+    animation: fadeInPage 1s ease-out;
+}
+
+@keyframes fadeInPage {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.finalTitle {
+    font-size: 2.5rem;
+    color: #d14d4d;
+    margin-bottom: 20px;
+}
+
+.collageGrid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 10px;
+    margin-bottom: 30px;
+}
+
+.collageItem {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    animation: slideIn 0.8s ease forwards;
+}
+
+.photoInner {
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    transition: transform 0.5s ease;
+}
+
+.collageItem:hover .photoInner {
+    transform: scale(1.1);
+}
+
+.collageItem:nth-child(1),
+.collageItem:nth-child(2) {
+    grid-column: span 3;
+    aspect-ratio: 1.5;
+}
+
+.collageItem:nth-child(3),
+.collageItem:nth-child(4),
+.collageItem:nth-child(5) {
+    grid-column: span 2;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.letterContainer {
+    background: rgba(255, 255, 255, 0.9);
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 40px rgba(209, 77, 77, 0.15);
+    border: 1px solid rgba(209, 77, 77, 0.2);
+}
+
+.letterText {
+    font-family: var(--font-playfair), serif;
+    font-size: 1.1rem;
+    color: #555;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    text-align: center;
+}
+
+.signature {
+    margin-top: 20px;
+    font-weight: bold;
+    color: #d14d4d;
+    font-size: 1.2rem;
+}
