@@ -61,9 +61,28 @@ export default function DayPage() {
         );
     }
 
+    const isDarkTheme = id === 2; // Day 2 is Starry Night (Dark)
+    const backBtnColor = isDarkTheme ? 'rgba(255, 255, 255, 0.8)' : '#333';
+
     return (
-        <div style={{ height: '90vh', padding: '20px', position: 'relative' }}>
-            <Link href="/" style={{ position: 'absolute', top: '20px', left: '20px', fontSize: '1.5rem', textDecoration: 'none' }}>←</Link>
+        <div style={{ minHeight: '100vh', position: 'relative' }}>
+            <Link href="/" style={{
+                position: 'fixed',
+                top: '25px',
+                left: '25px',
+                fontSize: '2rem',
+                textDecoration: 'none',
+                color: backBtnColor,
+                zIndex: 9999,
+                lineHeight: 1,
+                cursor: 'pointer',
+                transition: 'transform 0.2s',
+            }}
+                className="back-arrow"
+                aria-label="Back to Dashboard"
+            >
+                ←
+            </Link>
             <Component />
         </div>
     );

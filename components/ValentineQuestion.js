@@ -43,26 +43,45 @@ export default function ValentineQuestion({ onYes, visitCount = 0 }) {
     const moveNoButton = () => {
         if (!containerRef.current) return;
 
-        const container = containerRef.current;
-        const rect = container.getBoundingClientRect();
+        // Define safe zones - positions that are clearly away from the Yes button (on the left)
+        // No button should only move to the right side or far corners
+        const safePositions = [
+            { x: 150, y: -80 },   // top-right
+            { x: 200, y: 0 },     // far right
+            { x: 180, y: 80 },    // bottom-right
+            { x: 120, y: -120 },  // upper right corner
+            { x: 160, y: 100 },   // lower right corner
+            { x: 220, y: -40 },   // far upper right
+            { x: 200, y: 60 },    // far lower right
+            { x: 140, y: -100 },  // diagonal top
+            { x: 180, y: 120 },   // diagonal bottom
+        ];
 
-        // Increase range with more attempts
-        const range = Math.min(150 + attempts * 30, 300);
+        // Pick a random safe position that's different from current
+        let newPos;
+        do {
+            newPos = safePositions[Math.floor(Math.random() * safePositions.length)];
+        } while (newPos.x === noPos.x && newPos.y === noPos.y);
 
-        const x = (Math.random() - 0.5) * range * 2;
-        const y = (Math.random() - 0.5) * range * 2;
+        // Add some randomness but keep it in safe zone
+        const jitterX = (Math.random() - 0.5) * 40;
+        const jitterY = (Math.random() - 0.5) * 40;
 
-        setNoPos({ x, y });
+        setNoPos({
+            x: newPos.x + jitterX,
+            y: newPos.y + jitterY
+        });
         setAttempts((prev) => prev + 1);
 
-        // Make YES button grow
-        setYesScale((prev) => Math.min(prev + 0.05, 1.5));
+        // Make YES button grow slightly (visual feedback only)
+        setYesScale((prev) => Math.min(prev + 0.03, 1.3));
 
         // Make NO button shrink after 5 attempts
         if (attempts >= 5) {
-            setNoScale((prev) => Math.max(prev - 0.1, 0.3));
+            setNoScale((prev) => Math.max(prev - 0.08, 0.4));
         }
     };
+
 
     const handleYes = () => {
         setShowConfetti(true);

@@ -1,334 +1,727 @@
-/* Day 2 - Propose Day Styles */
+/* Day 2 - Premium Starry Night Propose Day ✨ */
+/* Ultra-smooth animations & refined visual polish */
+
+/* ============================================
+   ROOT CONTAINER
+   ============================================ */
 
 .container {
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: radial-gradient(circle at center, #2b1d0e 0%, #0f0a05 100%);
-    /* Deep rich background */
-    font-family: var(--font-playfair), serif;
-    overflow: hidden;
-    position: relative;
-    perspective: 1000px;
-}
-
-/* Envelope Container */
-.envelopeWrapper {
-    width: 300px;
-    height: 200px;
-    position: relative;
-    cursor: pointer;
-    transition: transform 0.5s ease;
-}
-
-.envelopeWrapper:hover {
-    transform: scale(1.02);
-}
-
-.envelope {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    background: #d4af37;
-    /* Gold base */
-    background: linear-gradient(135deg, #f3cf65 0%, #aa8526 100%);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    border-radius: 5px;
-}
-
-/* Flaps */
-.flapTop {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, #e6c156 0%, #b28c2c 100%);
-    clip-path: polygon(0 0, 100% 0, 50% 55%);
-    transform-origin: top;
-    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 5;
-}
-
-.flapTop.open {
-    transform: rotateX(180deg);
-    z-index: 1;
-    /* Move behind card when open */
-    transition-delay: 0.2s;
-}
-
-.flapLeft {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, #cca53d 0%, #997a22 100%);
-    clip-path: polygon(0 0, 0 100%, 55% 50%);
-    z-index: 3;
-}
-
-.flapRight {
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, #e6c156 0%, #b28c2c 100%);
-    clip-path: polygon(100% 0, 100% 100%, 45% 50%);
-    z-index: 3;
-}
-
-.flapBottom {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, #f3cf65 0%, #aa8526 100%);
-    clip-path: polygon(0 100%, 100% 100%, 50% 45%);
-    z-index: 4;
-}
-
-/* Wax Seal */
-.waxSeal {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -20%);
-    width: 60px;
-    height: 60px;
-    background: radial-gradient(circle at 30% 30%, #ff4d4d, #8b0000);
-    border-radius: 50%;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3), inset 0 2px 5px rgba(255, 255, 255, 0.3);
-    z-index: 10;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-family: serif;
-    font-size: 2rem;
-    color: #5a0000;
-    font-weight: bold;
-    text-shadow: 0 1px 1px rgba(255, 255, 255, 0.2);
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.waxSeal:hover {
-    transform: translate(-50%, -20%) scale(1.1);
-}
-
-.waxSeal.broken {
-    animation: breakSeal 0.5s forwards;
-}
-
-@keyframes breakSeal {
-    0% {
-        transform: translate(-50%, -20%) scale(1);
-        opacity: 1;
-    }
-
-    50% {
-        transform: translate(-50%, -20%) scale(1.2);
-        opacity: 0.8;
-    }
-
-    100% {
-        transform: translate(-50%, -20%) scale(0);
-        opacity: 0;
-        display: none;
-    }
-}
-
-/* Card Inside */
-.card {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    width: calc(100% - 20px);
-    height: calc(100% - 20px);
-    background: #fff;
-    z-index: 2;
-    padding: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: transform 1s ease-out;
-}
-
-.card.slideOut {
-    transform: translateY(-80px);
-    /* Just peek out initially */
-}
-
-.instruction {
-    position: absolute;
-    bottom: -40px;
-    width: 100%;
-    text-align: center;
-    color: #d4af37;
-    font-size: 0.9rem;
-    letter-spacing: 1px;
-    opacity: 0.7;
-    animation: pulseText 2s infinite;
-}
-
-@keyframes pulseText {
-
-    0%,
-    100% {
-        opacity: 0.5;
-    }
-
-    50% {
-        opacity: 1;
-    }
-}
-
-/* Letter View (Full Screen Reveal) */
-.letterView {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 20;
-    opacity: 0;
-    animation: fadeIn 1s forwards;
+    width: 100vw;
+    height: 100vh;
+    background: #000;
+    overflow: hidden;
+    font-family: 'Cormorant Garamond', var(--font-playfair), Georgia, serif;
 }
 
-.letterPaper {
-    background: #fffdf5;
-    padding: 40px;
-    max-width: 500px;
-    width: 90%;
-    border-radius: 5px;
-    box-shadow: 0 0 50px rgba(212, 175, 55, 0.2);
-    /* Gold glow */
-    text-align: center;
-    position: relative;
-    border: 1px solid #e1e1e1;
-}
+/* ============================================
+   DEEP SPACE BACKGROUND
+   ============================================ */
 
-.greeting {
-    font-size: 1.2rem;
-    color: #444;
-    margin-bottom: 20px;
-    font-style: italic;
-}
-
-.body {
-    font-size: 1.1rem;
-    color: #666;
-    line-height: 1.6;
-    margin-bottom: 15px;
-}
-
-.question {
-    font-size: 2rem;
-    color: #d14d4d;
-    margin: 30px 0;
-    font-weight: bold;
-}
-
-.actions {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    margin-top: 30px;
-    position: relative;
-    height: 60px;
-    /* Space for buttons */
-}
-
-.yesBtn {
-    background: #d14d4d;
-    color: white;
-    padding: 12px 30px;
-    border-radius: 30px;
-    font-size: 1.1rem;
-    border: none;
-    cursor: pointer;
-    transition: transform 0.2s;
-    box-shadow: 0 4px 15px rgba(209, 77, 77, 0.4);
-}
-
-.yesBtn:hover {
-    transform: scale(1.1);
-}
-
-.noBtn {
-    background: #eee;
-    color: #888;
-    padding: 12px 30px;
-    border-radius: 30px;
-    font-size: 1rem;
-    border: none;
-    cursor: pointer;
+.spaceBackground {
     position: absolute;
-    /* Allows movement */
-    transition: all 0.2s ease-out;
-    /* Smooth movement */
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 50%, #0c0c18 0%, #050508 100%);
 }
 
-/* Celebration */
-.celebration {
+.nebula1,
+.nebula2,
+.nebula3 {
+    position: absolute;
+    inset: -50%;
+    transition: transform 0.15s ease-out;
+    will-change: transform;
+}
+
+.nebula1 {
+    background:
+        radial-gradient(ellipse at 25% 35%, rgba(88, 28, 135, 0.12) 0%, transparent 45%),
+        radial-gradient(ellipse at 75% 65%, rgba(30, 58, 138, 0.1) 0%, transparent 50%);
+    animation: nebulaDrift 40s ease-in-out infinite;
+}
+
+.nebula2 {
+    background:
+        radial-gradient(ellipse at 65% 25%, rgba(126, 34, 206, 0.08) 0%, transparent 40%),
+        radial-gradient(ellipse at 35% 75%, rgba(37, 99, 235, 0.06) 0%, transparent 45%);
+    animation: nebulaDrift 50s ease-in-out infinite reverse;
+}
+
+.nebula3 {
+    background:
+        radial-gradient(ellipse at 50% 50%, rgba(147, 51, 234, 0.05) 0%, transparent 50%);
+    animation: nebulaDrift 60s ease-in-out infinite;
+}
+
+@keyframes nebulaDrift {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.7;
+    }
+}
+
+/* ============================================
+   STARS LAYERS
+   ============================================ */
+
+.starsLayer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    transition: transform 0.12s ease-out;
+    will-change: transform;
+}
+
+.layerFar {
+    z-index: 1;
+}
+
+.layerMid {
+    z-index: 2;
+}
+
+.layerNear {
+    z-index: 3;
+}
+
+.ambientStar {
+    position: absolute;
+    background: radial-gradient(circle, #fff 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%);
+    border-radius: 50%;
+    opacity: var(--opacity, 0.3);
+    animation: starTwinkle var(--duration, 4s) ease-in-out var(--delay, 0s) infinite;
+}
+
+@keyframes starTwinkle {
+
+    0%,
+    100% {
+        opacity: calc(var(--opacity, 0.3) * 0.4);
+        transform: scale(0.8);
+    }
+
+    50% {
+        opacity: var(--opacity, 0.3);
+        transform: scale(1);
+    }
+}
+
+/* ============================================
+   HINT TEXT
+   ============================================ */
+
+.hintContainer {
+    position: absolute;
+    bottom: 18%;
+    left: 0;
+    width: 100%;
     text-align: center;
-    color: white;
-    animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 50;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+    pointer-events: none;
 }
 
-.yesTitle {
-    font-size: 3rem;
-    color: #d4af37;
-    /* Gold */
-    margin-bottom: 20px;
+.hintContainer.visible {
+    opacity: 1;
+    transform: translateY(0);
 }
 
-.heartExplosion {
-    font-size: 5rem;
-    animation: heartbeat 1s infinite;
+.hintText {
+    font-size: 1.1rem;
+    font-weight: 300;
+    color: rgba(255, 255, 255, 0.35);
+    letter-spacing: 6px;
+    text-transform: lowercase;
+    font-style: italic;
+    animation: hintGlow 4s ease-in-out infinite;
 }
 
-.loveNote {
+@keyframes hintGlow {
+
+    0%,
+    100% {
+        opacity: 0.35;
+    }
+
+    50% {
+        opacity: 0.6;
+    }
+}
+
+/* ============================================
+   CONSTELLATION LAYER
+   ============================================ */
+
+.constellationLayer {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    transition: opacity 1s ease;
+}
+
+.constellationLayer.fadeOut {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.starWrapper {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    cursor: pointer;
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.starOuter {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.starCore {
+    width: 5px;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.35);
+    border-radius: 50%;
+    transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 0 4px rgba(255, 255, 255, 0.2);
+}
+
+/* Hover state */
+.starWrapper:hover .starCore {
+    width: 10px;
+    height: 10px;
+    background: rgba(255, 255, 255, 0.7);
+    box-shadow:
+        0 0 12px 4px rgba(255, 255, 255, 0.5),
+        0 0 25px 8px rgba(167, 139, 250, 0.3);
+}
+
+/* Lit state */
+.starWrapper.lit .starCore {
+    width: 8px;
+    height: 8px;
+    background: #fff;
+    box-shadow:
+        0 0 15px 5px rgba(255, 255, 255, 0.9),
+        0 0 35px 10px rgba(167, 139, 250, 0.6),
+        0 0 60px 20px rgba(167, 139, 250, 0.25);
+    animation: litPulse 3s ease-in-out infinite;
+}
+
+@keyframes litPulse {
+
+    0%,
+    100% {
+        box-shadow:
+            0 0 15px 5px rgba(255, 255, 255, 0.9),
+            0 0 35px 10px rgba(167, 139, 250, 0.6),
+            0 0 60px 20px rgba(167, 139, 250, 0.25);
+    }
+
+    50% {
+        box-shadow:
+            0 0 20px 8px rgba(255, 255, 255, 1),
+            0 0 45px 15px rgba(167, 139, 250, 0.7),
+            0 0 80px 25px rgba(167, 139, 250, 0.3);
+    }
+}
+
+/* Star Letter */
+.starLetter {
+    position: absolute;
+    top: -8px;
     font-size: 1.5rem;
-    margin-top: 20px;
-    opacity: 0.9;
+    font-weight: 300;
+    color: transparent;
+    letter-spacing: 1px;
+    text-transform: lowercase;
+    opacity: 0;
+    transform: translateY(8px) scale(0.7);
+    transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition-delay: var(--delay, 0s);
+    pointer-events: none;
 }
 
-@keyframes heartbeat {
-    0% {
+.starLetter.show {
+    opacity: 1;
+    color: #fff;
+    text-shadow:
+        0 0 20px rgba(167, 139, 250, 0.9),
+        0 0 40px rgba(167, 139, 250, 0.5);
+    transform: translateY(0) scale(1);
+}
+
+/* ============================================
+   REVEALED MESSAGE
+   ============================================ */
+
+.messageOverlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 25;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 1.2s ease;
+}
+
+.messageOverlay.visible {
+    opacity: 1;
+}
+
+.revealedMessage {
+    text-align: center;
+}
+
+.messageLine {
+    display: block;
+    font-size: clamp(2rem, 6vw, 3.5rem);
+    font-weight: 300;
+    color: #fff;
+    letter-spacing: 4px;
+    line-height: 1.5;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: lineReveal 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.messageLine:nth-child(1) {
+    animation-delay: 0.2s;
+}
+
+.messageLine:nth-child(2) {
+    animation-delay: 0.5s;
+}
+
+.messageOverlay.visible .messageLine {
+    text-shadow:
+        0 0 40px rgba(167, 139, 250, 0.7),
+        0 0 80px rgba(167, 139, 250, 0.4),
+        0 0 120px rgba(167, 139, 250, 0.2);
+}
+
+@keyframes lineReveal {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ============================================
+   YES BUTTON - Premium Styling
+   ============================================ */
+
+.buttonContainer {
+    position: absolute;
+    bottom: 15%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 30;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.8s ease 0.3s, transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s;
+}
+
+.buttonContainer.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.yesButton {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 20px 55px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    overflow: hidden;
+    border-radius: 100px;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Button border glow */
+.yesButton::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 100px;
+    padding: 1.5px;
+    background: linear-gradient(135deg,
+            rgba(167, 139, 250, 0.6) 0%,
+            rgba(255, 255, 255, 0.3) 50%,
+            rgba(167, 139, 250, 0.6) 100%);
+    -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    transition: all 0.4s ease;
+}
+
+/* Button glass fill */
+.yesButton::after {
+    content: '';
+    position: absolute;
+    inset: 2px;
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 100px;
+    transition: all 0.4s ease;
+}
+
+.yesButton:hover {
+    transform: scale(1.06);
+}
+
+.yesButton:hover::before {
+    background: linear-gradient(135deg,
+            rgba(167, 139, 250, 0.9) 0%,
+            rgba(255, 255, 255, 0.5) 50%,
+            rgba(167, 139, 250, 0.9) 100%);
+}
+
+.yesButton:hover::after {
+    background: rgba(167, 139, 250, 0.08);
+    box-shadow:
+        0 0 40px rgba(167, 139, 250, 0.3),
+        inset 0 0 40px rgba(167, 139, 250, 0.05);
+}
+
+.buttonText {
+    position: relative;
+    z-index: 2;
+    font-family: inherit;
+    font-size: 1.3rem;
+    font-weight: 300;
+    color: #fff;
+    letter-spacing: 3px;
+}
+
+.buttonIcon {
+    position: relative;
+    z-index: 2;
+    font-size: 1.4rem;
+    animation: gentlePulse 2s ease-in-out infinite;
+}
+
+@keyframes gentlePulse {
+
+    0%,
+    100% {
         transform: scale(1);
     }
 
     50% {
-        transform: scale(1.2);
+        transform: scale(1.15);
     }
+}
 
+/* ============================================
+   PROGRESS INDICATOR
+   ============================================ */
+
+.progressContainer {
+    position: absolute;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    z-index: 50;
+}
+
+.progressTrack {
+    width: 180px;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progressFill {
+    height: 100%;
+    background: linear-gradient(90deg,
+            rgba(167, 139, 250, 0.4) 0%,
+            rgba(167, 139, 250, 0.9) 50%,
+            rgba(255, 255, 255, 0.9) 100%);
+    border-radius: 10px;
+    transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    box-shadow: 0 0 12px rgba(167, 139, 250, 0.5);
+}
+
+.progressLabel {
+    font-size: 0.7rem;
+    font-weight: 300;
+    color: rgba(255, 255, 255, 0.25);
+    letter-spacing: 2px;
+}
+
+/* ============================================
+   CELEBRATION SCREEN
+   ============================================ */
+
+.celebrationBg {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 50%, #0c0c18 0%, #050508 100%);
+}
+
+.bgGlow1 {
+    position: absolute;
+    top: 20%;
+    left: 30%;
+    width: 40%;
+    height: 40%;
+    background: radial-gradient(circle, rgba(167, 139, 250, 0.15) 0%, transparent 70%);
+    filter: blur(60px);
+    animation: glowFloat 8s ease-in-out infinite;
+}
+
+.bgGlow2 {
+    position: absolute;
+    bottom: 20%;
+    right: 30%;
+    width: 35%;
+    height: 35%;
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.12) 0%, transparent 70%);
+    filter: blur(50px);
+    animation: glowFloat 10s ease-in-out infinite reverse;
+}
+
+@keyframes glowFloat {
+
+    0%,
     100% {
-        transform: scale(1);
+        transform: translate(0, 0) scale(1);
+    }
+
+    50% {
+        transform: translate(20px, -20px) scale(1.1);
     }
 }
 
-@keyframes popIn {
-    from {
-        transform: scale(0.5);
-        opacity: 0;
-    }
+.celebrationContent {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    gap: 35px;
+    overflow-y: auto;
+}
 
+.celebrationTitle {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    opacity: 0;
+    animation: fadeUp 1s ease forwards 0.2s;
+}
+
+.titleWord {
+    font-size: clamp(1.6rem, 5vw, 2.2rem);
+    font-weight: 300;
+    color: #fff;
+    letter-spacing: 6px;
+    text-shadow: 0 0 30px rgba(167, 139, 250, 0.5);
+}
+
+.titleHeart {
+    font-size: clamp(1.8rem, 5vw, 2.5rem);
+    animation: gentlePulse 2s ease-in-out infinite;
+}
+
+/* Photo Grid */
+.photoGrid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    max-width: 420px;
+    width: 100%;
+    opacity: 0;
+    animation: fadeUp 1s ease forwards 0.4s;
+}
+
+.photoCard {
+    aspect-ratio: 1;
+    border-radius: 6px;
+    overflow: hidden;
+    opacity: 0;
+    transform: scale(0.9) translateY(15px);
+    animation: photoIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    animation-delay: var(--delay, 0s);
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+        box-shadow 0.35s ease;
+}
+
+.photoCard:hover {
+    transform: scale(1.08) rotate(1deg);
+    z-index: 5;
+    box-shadow:
+        0 8px 30px rgba(0, 0, 0, 0.4),
+        0 0 20px rgba(167, 139, 250, 0.2);
+}
+
+.photoImage {
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    transition: transform 0.4s ease;
+}
+
+.photoCard:hover .photoImage {
+    transform: scale(1.05);
+}
+
+@keyframes photoIn {
     to {
-        transform: scale(1);
         opacity: 1;
+        transform: scale(1) translateY(0);
     }
 }
 
-@keyframes fadeIn {
+/* Letter Container */
+.letterContainer {
+    max-width: 400px;
+    width: 100%;
+    opacity: 0;
+    animation: fadeUp 1s ease forwards 0.8s;
+}
+
+.letterContent {
+    position: relative;
+    padding: 35px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow:
+        0 10px 40px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.letterText {
+    font-family: inherit;
+    font-size: 1.1rem;
+    font-weight: 300;
+    color: rgba(255, 255, 255, 0.85);
+    line-height: 1.9;
+    white-space: pre-wrap;
+    text-align: center;
+    letter-spacing: 0.5px;
+}
+
+@keyframes fadeUp {
     to {
         opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ============================================
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+    .hintText {
+        font-size: 0.95rem;
+        letter-spacing: 4px;
+    }
+
+    .starWrapper {
+        padding: 30px;
+    }
+
+    .starLetter {
+        font-size: 1.3rem;
+    }
+
+    .yesButton {
+        padding: 18px 45px;
+    }
+
+    .buttonText {
+        font-size: 1.15rem;
+        letter-spacing: 2px;
+    }
+
+    .photoGrid {
+        max-width: 320px;
+        gap: 6px;
+    }
+
+    .letterContent {
+        padding: 28px;
+    }
+
+    .letterText {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .messageLine {
+        letter-spacing: 2px;
+    }
+
+    .yesButton {
+        padding: 16px 38px;
+    }
+
+    .buttonText {
+        font-size: 1.05rem;
+    }
+
+    .progressTrack {
+        width: 140px;
+    }
+
+    .photoGrid {
+        max-width: 280px;
+    }
+
+    .letterContent {
+        padding: 22px;
+        margin: 0 10px;
+    }
+
+    .letterText {
+        font-size: 0.95rem;
+        line-height: 1.8;
     }
 }
