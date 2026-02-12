@@ -1,0 +1,696 @@
+/* Day 6 — Hug Day: "Pop the Love Bubbles" 🫧💕 */
+/* A fun, tactile bubble-popping mini-game with dreamy warm aesthetics */
+
+/* ============================================
+   ROOT CONTAINER & BACKGROUND
+   ============================================ */
+
+.container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(160deg, #1a0a2e 0%, #2d1b4e 30%, #4a1942 60%, #1a0a2e 100%);
+    overflow: hidden;
+    font-family: 'Quicksand', 'Nunito', sans-serif;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Ambient glow orbs */
+.glowOrb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(100px);
+    z-index: 0;
+    opacity: 0.4;
+    animation: orbDrift 20s infinite alternate ease-in-out;
+    pointer-events: none;
+}
+
+.glowOrb1 {
+    composes: glowOrb;
+    top: -10%;
+    left: -5%;
+    width: 50vw;
+    height: 50vw;
+    background: rgba(233, 30, 99, 0.3);
+    animation-duration: 25s;
+}
+
+.glowOrb2 {
+    composes: glowOrb;
+    bottom: -15%;
+    right: -10%;
+    width: 60vw;
+    height: 60vw;
+    background: rgba(156, 39, 176, 0.25);
+    animation-duration: 30s;
+    animation-delay: -8s;
+}
+
+.glowOrb3 {
+    composes: glowOrb;
+    top: 40%;
+    left: 50%;
+    width: 30vw;
+    height: 30vw;
+    background: rgba(255, 152, 0, 0.2);
+    animation-duration: 22s;
+    animation-delay: -12s;
+}
+
+@keyframes orbDrift {
+    0% {
+        transform: translate(0, 0) scale(1);
+    }
+
+    100% {
+        transform: translate(40px, 50px) scale(1.2);
+    }
+}
+
+/* ============================================
+   HEADER / HUD
+   ============================================ */
+
+.hud {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    padding: 30px 25px 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    pointer-events: none;
+}
+
+.title {
+    font-family: 'Pacifico', cursive;
+    font-size: 2rem;
+    background: linear-gradient(45deg, #ff6090, #f48fb1, #ffab91);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 0;
+    filter: drop-shadow(0 2px 8px rgba(255, 96, 144, 0.4));
+}
+
+.counterWrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    padding: 8px 20px;
+    border-radius: 30px;
+}
+
+.counterText {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.counterValue {
+    color: #f48fb1;
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+
+/* ============================================
+   BUBBLES
+   ============================================ */
+
+.bubblesCanvas {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+}
+
+.bubble {
+    position: absolute;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    transition: transform 0.15s ease;
+    animation: bubbleFloat var(--float-duration, 6s) ease-in-out infinite alternate;
+    animation-delay: var(--float-delay, 0s);
+}
+
+.bubble:active {
+    transform: scale(0.92);
+}
+
+/* Bubble inner glow & glass effect */
+.bubbleInner {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: var(--bubble-bg, radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.3) 0%, rgba(255, 150, 200, 0.15) 40%, rgba(200, 100, 180, 0.1) 100%));
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    box-shadow:
+        inset 0 0 20px rgba(255, 255, 255, 0.1),
+        0 8px 32px rgba(0, 0, 0, 0.2),
+        0 0 15px var(--bubble-glow, rgba(233, 30, 99, 0.2));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Shine highlight on bubble */
+.bubbleInner::before {
+    content: '';
+    position: absolute;
+    top: 12%;
+    left: 18%;
+    width: 30%;
+    height: 20%;
+    background: radial-gradient(ellipse, rgba(255, 255, 255, 0.5) 0%, transparent 70%);
+    border-radius: 50%;
+    transform: rotate(-30deg);
+}
+
+.bubbleText {
+    font-family: 'Nunito', sans-serif;
+    font-size: var(--bubble-font, 0.72rem);
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 700;
+    line-height: 1.3;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    z-index: 1;
+}
+
+.bubbleEmoji {
+    font-size: var(--emoji-size, 1.8rem);
+    z-index: 1;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+@keyframes bubbleFloat {
+    0% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+
+    25% {
+        transform: translate(var(--dx1, 8px), var(--dy1, -12px)) rotate(2deg);
+    }
+
+    50% {
+        transform: translate(var(--dx2, -5px), var(--dy2, 6px)) rotate(-1deg);
+    }
+
+    75% {
+        transform: translate(var(--dx3, 10px), var(--dy3, -4px)) rotate(1deg);
+    }
+
+    100% {
+        transform: translate(var(--dx4, -8px), var(--dy4, -10px)) rotate(-2deg);
+    }
+}
+
+/* ============================================
+   POP ANIMATION
+   ============================================ */
+
+.popEffect {
+    position: absolute;
+    pointer-events: none;
+    z-index: 30;
+    animation: popBurst 0.5s ease-out forwards;
+}
+
+@keyframes popBurst {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.6);
+        opacity: 0.6;
+    }
+
+    100% {
+        transform: scale(2);
+        opacity: 0;
+    }
+}
+
+/* Pop sparkles */
+.popSparkle {
+    position: absolute;
+    pointer-events: none;
+    z-index: 35;
+    font-size: 1.2rem;
+    animation: sparkleOut 0.7s ease-out forwards;
+}
+
+@keyframes sparkleOut {
+    0% {
+        opacity: 1;
+        transform: translate(0, 0) scale(0.5);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translate(var(--sx), var(--sy)) scale(1.2) rotate(var(--srot));
+    }
+}
+
+/* Popped message that floats up */
+.poppedMessage {
+    position: absolute;
+    pointer-events: none;
+    z-index: 40;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1rem;
+    color: #f48fb1;
+    font-weight: 700;
+    font-style: italic;
+    text-shadow: 0 0 10px rgba(244, 143, 177, 0.5);
+    white-space: nowrap;
+    animation: messageFloat 2s ease-out forwards;
+}
+
+@keyframes messageFloat {
+    0% {
+        opacity: 1;
+        transform: translateY(0) scale(0.8);
+    }
+
+    30% {
+        opacity: 1;
+        transform: translateY(-20px) scale(1);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateY(-80px) scale(0.9);
+    }
+}
+
+/* ============================================
+   MEGA BUBBLE (Final boss)
+   ============================================ */
+
+.megaBubbleWrapper {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 25;
+    animation: fadeIn 1s ease;
+}
+
+.megaBubble {
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    animation: megaPulse 2s ease-in-out infinite;
+}
+
+.megaBubbleInner {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%,
+            rgba(255, 215, 0, 0.4) 0%,
+            rgba(255, 152, 0, 0.2) 40%,
+            rgba(233, 30, 99, 0.15) 80%,
+            rgba(156, 39, 176, 0.1) 100%);
+    border: 2px solid rgba(255, 215, 0, 0.3);
+    box-shadow:
+        inset 0 0 40px rgba(255, 215, 0, 0.15),
+        0 0 60px rgba(255, 215, 0, 0.2),
+        0 0 120px rgba(233, 30, 99, 0.15),
+        0 15px 40px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 8px;
+    position: relative;
+    overflow: hidden;
+}
+
+.megaBubbleInner::before {
+    content: '';
+    position: absolute;
+    top: 10%;
+    left: 20%;
+    width: 35%;
+    height: 22%;
+    background: radial-gradient(ellipse, rgba(255, 255, 255, 0.45) 0%, transparent 70%);
+    border-radius: 50%;
+    transform: rotate(-25deg);
+}
+
+.megaEmoji {
+    font-size: 4rem;
+    z-index: 1;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+}
+
+.megaText {
+    font-family: 'Pacifico', cursive;
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.9);
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    z-index: 1;
+}
+
+.megaHint {
+    position: absolute;
+    bottom: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.5);
+    font-weight: 600;
+    white-space: nowrap;
+    animation: gentleBounce 2s ease-in-out infinite;
+}
+
+@keyframes megaPulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.06);
+    }
+}
+
+@keyframes gentleBounce {
+
+    0%,
+    100% {
+        transform: translateX(-50%) translateY(0);
+    }
+
+    50% {
+        transform: translateX(-50%) translateY(-5px);
+    }
+}
+
+/* ============================================
+   MEGA POP EXPLOSION
+   ============================================ */
+
+.megaExplosion {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    pointer-events: none;
+}
+
+.megaExplosionParticle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    animation: megaBurst 1.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes megaBurst {
+    0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(0.3);
+    }
+
+    70% {
+        opacity: 0.9;
+    }
+
+    100% {
+        opacity: 0;
+        transform: translate(calc(-50% + var(--mx)),
+                calc(-50% + var(--my))) scale(1.8) rotate(var(--mrot));
+    }
+}
+
+/* Golden flash */
+.goldenFlash {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle at center, rgba(255, 215, 0, 0.4) 0%, transparent 70%);
+    z-index: 75;
+    animation: flashOut 0.8s ease-out forwards;
+    pointer-events: none;
+}
+
+@keyframes flashOut {
+    0% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}
+
+/* ============================================
+   CELEBRATION (Phase 3)
+   ============================================ */
+
+.celebrationContainer {
+    position: absolute;
+    inset: 0;
+    z-index: 60;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    overflow-y: auto;
+    padding: 40px 20px 60px;
+    animation: fadeIn 1s ease 0.3s both;
+    -webkit-overflow-scrolling: touch;
+}
+
+.celebHeader {
+    text-align: center;
+    margin-bottom: 25px;
+    animation: scaleUp 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.5s both;
+}
+
+.celebTitle {
+    font-family: 'Pacifico', cursive;
+    font-size: 2.4rem;
+    background: linear-gradient(45deg, #ffab91, #ff6090, #f48fb1);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 0;
+    filter: drop-shadow(0 2px 8px rgba(255, 96, 144, 0.3));
+}
+
+.celebQuote {
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.6);
+    font-style: italic;
+    margin-top: 10px;
+    max-width: 320px;
+    line-height: 1.5;
+}
+
+/* Letter */
+.letterCard {
+    background: rgba(255, 253, 240, 0.95);
+    padding: 28px;
+    border-radius: 20px;
+    box-shadow:
+        0 15px 50px rgba(0, 0, 0, 0.3),
+        inset 0 0 30px rgba(255, 255, 255, 0.4);
+    max-width: 90%;
+    width: 400px;
+    position: relative;
+    border: 1px solid rgba(224, 208, 176, 0.4);
+    margin-bottom: 30px;
+    animation: letterSlide 0.8s ease 0.7s both;
+}
+
+@keyframes letterSlide {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.seal {
+    font-size: 2.5rem;
+    position: absolute;
+    top: -15px;
+    right: -8px;
+    filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.25));
+    transform: rotate(12deg);
+}
+
+.letterHeading {
+    font-family: 'Pacifico', cursive;
+    font-size: 1.3rem;
+    color: #d14d4d;
+    margin-bottom: 12px;
+}
+
+.letterBody {
+    font-family: 'Nunito', sans-serif;
+    font-size: 1rem;
+    color: #555;
+    line-height: 1.8;
+    white-space: pre-line;
+    font-style: italic;
+}
+
+/* Pinned Polaroid — overlays top-right of letter */
+.pinnedPolaroid {
+    position: absolute;
+    top: -30px;
+    right: -15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 10;
+    animation: polaroidDrop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.9s both;
+}
+
+.pin {
+    font-size: 1.3rem;
+    z-index: 5;
+    margin-bottom: -8px;
+    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.3));
+    transform: rotate(15deg);
+}
+
+.polaroidFrame {
+    background: #fff;
+    padding: 5px;
+    padding-bottom: 8px;
+    border-radius: 2px;
+    box-shadow:
+        0 6px 20px rgba(0, 0, 0, 0.3),
+        0 2px 6px rgba(0, 0, 0, 0.15);
+    transform: rotate(6deg);
+    width: 90px;
+    transition: transform 0.3s ease;
+}
+
+.polaroidFrame:hover {
+    transform: rotate(2deg) scale(1.08);
+}
+
+.polaroidImg {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 1px;
+}
+
+@keyframes polaroidDrop {
+    0% {
+        opacity: 0;
+        transform: translateY(-30px) rotate(10deg);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) rotate(0deg);
+    }
+}
+
+/* ============================================
+   SHARED ANIMATIONS
+   ============================================ */
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes scaleUp {
+    from {
+        transform: scale(0.7);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 600px) {
+    .title {
+        font-size: 1.7rem;
+    }
+
+    .megaBubble {
+        width: 180px;
+        height: 180px;
+    }
+
+    .megaEmoji {
+        font-size: 3rem;
+    }
+
+    .celebTitle {
+        font-size: 2rem;
+    }
+
+    .letterCard {
+        padding: 20px;
+        width: 92%;
+    }
+
+    .photoGrid {
+        width: 92%;
+        gap: 8px;
+    }
+}
+
+@media (max-width: 380px) {
+    .title {
+        font-size: 1.5rem;
+    }
+
+    .megaBubble {
+        width: 160px;
+        height: 160px;
+    }
+}
