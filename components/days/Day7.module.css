@@ -1,0 +1,513 @@
+/* Day 7 — Kiss Day: "Catch the Kiss" 💋 */
+/* A dynamic catcher game — catch falling kisses in a basket! */
+
+/* ============================================
+   ROOT CONTAINER & BACKGROUND
+   ============================================ */
+
+.container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(160deg, #1a0a1e 0%, #2d0f2e 30%, #3d1535 60%, #1a0a1e 100%);
+    overflow: hidden;
+    font-family: 'Quicksand', 'Nunito', sans-serif;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: none;
+    /* Important for game controls */
+    transition: background 2s ease;
+}
+
+/* Background warms up as more kisses are caught */
+.warm1 {
+    background: linear-gradient(160deg, #220a1e 0%, #381228 30%, #4a1832 60%, #1e0a1e 100%);
+}
+
+.warm2 {
+    background: linear-gradient(160deg, #2a0a1a 0%, #451822 30%, #581e30 60%, #220a1a 100%);
+}
+
+.warm3 {
+    background: linear-gradient(160deg, #320a18 0%, #551c20 30%, #68222c 60%, #2a0a18 100%);
+}
+
+/* ============================================
+   HUD — Header UI
+   ============================================ */
+
+.hud {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    padding: 30px 20px 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    pointer-events: none;
+}
+
+.title {
+    font-family: 'Pacifico', cursive;
+    font-size: 1.8rem;
+    background: linear-gradient(45deg, #ff4d6d, #ff758f, #ff9cb2);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 0;
+    filter: drop-shadow(0 2px 8px rgba(255, 77, 109, 0.4));
+}
+
+.subtitle {
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.45);
+    font-weight: 600;
+    font-style: italic;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 5px 15px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.progressBar {
+    width: 200px;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 5px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.progressFill {
+    height: 100%;
+    background: linear-gradient(90deg, #ff4d6d, #ff758f, #ffab91);
+    border-radius: 4px;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 10px rgba(255, 100, 140, 0.6);
+}
+
+.scoreText {
+    font-family: 'Quicksand', sans-serif;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 700;
+}
+
+/* ============================================
+   GAME AREA
+   ============================================ */
+
+.gameLayer {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    pointer-events: none;
+    /* Let touches pass through to container */
+}
+
+/* The Basket */
+.basket {
+    position: absolute;
+    bottom: 80px;
+    /* Reduced from 100px so it's easier to reach */
+    transform: translateX(-50%);
+    width: 80px;
+    height: 60px;
+    z-index: 20;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.3));
+    transition: transform 0.08s linear;
+    /* Smooth but responsive */
+}
+
+.basketEmoji {
+    font-size: 4rem;
+    line-height: 1;
+    transform: translateY(5px);
+}
+
+/* Falling Items */
+.fallingItem {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    font-size: 2rem;
+    z-index: 15;
+    will-change: top, left;
+    filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.2));
+}
+
+.goldenItem {
+    filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.6));
+    animation: spin 3s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+
+    to {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+/* ============================================
+   EFFECTS
+   ============================================ */
+
+/* Catch Effect +1 */
+.catchEffect {
+    position: absolute;
+    font-weight: bold;
+    color: #ff758f;
+    font-size: 1.2rem;
+    pointer-events: none;
+    animation: floatUpFade 1s ease-out forwards;
+    z-index: 30;
+    text-shadow: 0 0 5px rgba(255, 117, 143, 0.5);
+    white-space: nowrap;
+}
+
+@keyframes floatUpFade {
+    0% {
+        opacity: 1;
+        transform: translate(-50%, 0) scale(0.8);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -60px) scale(1.2);
+    }
+}
+
+.sparkle {
+    position: absolute;
+    pointer-events: none;
+    z-index: 35;
+    font-size: 1.1rem;
+    animation: sparkleBurst 0.8s ease-out forwards;
+}
+
+@keyframes sparkleBurst {
+    0% {
+        opacity: 1;
+        transform: translate(0, 0) scale(0.4);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translate(var(--sx), var(--sy)) scale(1.3) rotate(var(--sr));
+    }
+}
+
+/* Missed Item Fade */
+.missedItem {
+    opacity: 0.5;
+    transform: scale(0.8);
+    transition: opacity 0.5s, transform 0.5s;
+}
+
+/* ============================================
+   PHASE 2 & 3 (Retained from v3)
+   ============================================ */
+/* Keeping these mostly same as v3 since they work well for the climax */
+
+.kissPhase {
+    position: absolute;
+    inset: 0;
+    z-index: 60;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.4);
+    /* Slight dim */
+    backdrop-filter: blur(5px);
+    animation: fadeIn 0.8s ease;
+}
+
+.kissRingContainer {
+    position: relative;
+    width: 220px;
+    height: 220px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.ringSvg {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+}
+
+.ringBg {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.1);
+    stroke-width: 4;
+}
+
+.ringFill {
+    fill: none;
+    stroke: #ff4d6d;
+    stroke-width: 5;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.05s linear;
+    filter: drop-shadow(0 0 10px #ff4d6d);
+}
+
+.bigKiss {
+    font-size: 5rem;
+    z-index: 2;
+    filter: drop-shadow(0 0 30px rgba(255, 100, 140, 0.6));
+    transition: transform 0.2s;
+}
+
+.heartbeat {
+    animation: hbPulse var(--hb-speed, 1.2s) ease-in-out infinite;
+}
+
+@keyframes hbPulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    15% {
+        transform: scale(1.15);
+    }
+
+    30% {
+        transform: scale(1);
+    }
+
+    45% {
+        transform: scale(1.12);
+    }
+
+    60% {
+        transform: scale(1);
+    }
+}
+
+.kissHint {
+    margin-top: 30px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1.1rem;
+    color: white;
+    font-weight: 600;
+    text-shadow: 0 0 10px rgba(255, 100, 140, 0.8);
+    animation: pulseText 2s infinite;
+}
+
+@keyframes pulseText {
+
+    0%,
+    100% {
+        opacity: 0.7;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+
+/* Explosion */
+.flash {
+    position: fixed;
+    inset: 0;
+    background: white;
+    z-index: 80;
+    animation: flashOut 1.5s ease-out forwards;
+    pointer-events: none;
+}
+
+@keyframes flashOut {
+    0% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}
+
+.explosionLayer {
+    position: fixed;
+    inset: 0;
+    z-index: 85;
+    pointer-events: none;
+}
+
+.explosionParticle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    animation: explode 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes explode {
+    0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(0.3);
+    }
+
+    70% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+        transform: translate(calc(-50% + var(--ex)), calc(-50% + var(--ey))) scale(1.5) rotate(var(--er));
+    }
+}
+
+/* Celebration */
+.celebWrap {
+    position: absolute;
+    inset: 0;
+    z-index: 70;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    overflow-y: auto;
+    padding: 40px 20px 80px;
+    background: linear-gradient(160deg, #1a0a1e 0%, #3d1535 60%, #1a0a1e 100%);
+    animation: fadeIn 1s ease;
+}
+
+.celebHeader {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.celebTitle {
+    font-family: 'Pacifico', cursive;
+    font-size: 2.2rem;
+    background: linear-gradient(45deg, #ff9cb2, #ff4d6d, #ffab91);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 0;
+}
+
+.celebSub {
+    color: rgba(255, 255, 255, 0.6);
+    font-style: italic;
+    margin-top: 5px;
+}
+
+.photoGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    width: 100%;
+    max-width: 350px;
+    margin-bottom: 25px;
+}
+
+.photoCard {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    aspect-ratio: 3/4;
+    animation: slideUp 0.6s ease both;
+    animation-delay: var(--delay);
+}
+
+.photoImg {
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.letterCard {
+    background: rgba(255, 253, 240, 0.95);
+    padding: 25px;
+    border-radius: 15px;
+    width: 100%;
+    max-width: 400px;
+    color: #444;
+    position: relative;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    margin-bottom: 20px;
+    animation: slideUp 0.8s ease 0.4s both;
+}
+
+.letterBody {
+    font-family: 'Nunito', sans-serif;
+    line-height: 1.6;
+    white-space: pre-line;
+}
+
+.pinPolaroid {
+    position: absolute;
+    top: -20px;
+    right: -10px;
+    transform: rotate(5deg);
+    background: white;
+    padding: 5px 5px 15px 5px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.polaroidImg {
+    width: 70px;
+    display: block;
+}
+
+.pin {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    font-size: 1.5rem;
+    transform: translateX(-50%);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .basketEmoji {
+        font-size: 3.5rem;
+    }
+
+    .title {
+        font-size: 1.5rem;
+    }
+}
