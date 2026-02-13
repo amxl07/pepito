@@ -7,13 +7,11 @@ import styles from "./Day8.module.css";
 //  CONSTANTS & DATA
 // ═══════════════════════════════════════════
 
-const PHOTOS = [
-    "/Propose-Day-pics/IMG_1486.JPG",
-    "/Propose-Day-pics/IMG_3569.JPG",
-    "/Rose-Day-pics/IMG_2624.JPG",
-    "/Hug-Day-pics/IMG_3657.jpg",
-];
-const POLAROID = "/Propose-Day-pics/IMG_3249.jpg";
+// ═══════════════════════════════════════════
+//  CONSTANTS & DATA
+// ═══════════════════════════════════════════
+
+const POLAROID = "/Propose-Day-pics/ending-pinned.jpg";
 
 const FINAL_LETTER = `My Dearest Pepito,
 
@@ -58,24 +56,31 @@ const SCRAMBLE_WORDS = [
 ];
 
 // Level 3: Memory match pairs
-const MEMORY_PAIRS = ["🍡", "🍰", "⭐", "🌙", "💃", "🏖️"];
+const MEMORY_PAIRS = [
+    "/Propose-Day-pics/IMG_1013.jpg",
+    "/Propose-Day-pics/IMG_1486.JPG",
+    "/Propose-Day-pics/IMG_2010.JPG",
+    "/Propose-Day-pics/IMG_2809.JPG",
+    "/Propose-Day-pics/IMG_3249.jpg",
+    "/Propose-Day-pics/IMG_3569.JPG",
+];
 
 // Level 4: Quiz questions
 const QUIZ = [
-    { q: "What's our song?", opts: ["Shape of You", "We Are The People", "Perfect"], ans: 1 },
-    { q: "What does Manoj call Sanghu?", opts: ["Sugar Plum", "Bubbleyum Princess", "Honey Bear"], ans: 1 },
+    { q: "What's Mr.KeraCool's favorite song?", opts: ["Sweater Weather", "We Are The People", "Perfect"], ans: 0 },
+    { q: "What does Mr.KeraCool call Sanghu?", opts: ["Sugar Plum", "Bubbleyum Princess", "Honey Bear"], ans: 1 },
     { q: "How did we first connect?", opts: ["At a cafe", "Through friends", "Asked her for a dance"], ans: 2 },
-    { q: "What's her favorite show?", opts: ["The Office", "F.R.I.E.N.D.S", "Brooklyn Nine-Nine"], ans: 1 },
-    { q: "What makes Manoj smile most about her?", opts: ["Her cooking", "Her weird noises", "Her texts"], ans: 1 },
+    { q: "What's our favorite show", opts: ["The Office", "F.R.I.E.N.D.S", "Brooklyn Nine-Nine"], ans: 1 },
+    { q: "What makes Mr.KeraCool smile most about her?", opts: ["Her cooking", "Her cute noises", "Her texts"], ans: 1 },
 ];
 
 // Level 5: Scratch card reasons
 const LOVE_REASONS = [
-    "The childlike spirit in you ✨",
+    "The child in you ✨",
     "I just love being with you 💕",
     "Your presence makes everything better 🌟",
     "You're my Bubbleyum Princess 👑",
-    "Your weird noises make my day 😄",
+    "Your cute noises make my day 😄",
 ];
 
 // Level 6: Heart catch
@@ -280,7 +285,7 @@ function WordScrambleLevel({ onComplete }) {
 
 function MemoryMatchLevel({ onComplete }) {
     const [cards] = useState(() => {
-        const deck = [...MEMORY_PAIRS, ...MEMORY_PAIRS].map((emoji, i) => ({ id: i, emoji }));
+        const deck = [...MEMORY_PAIRS, ...MEMORY_PAIRS].map((img, i) => ({ id: i, img }));
         for (let i = deck.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [deck[i], deck[j]] = [deck[j], deck[i]];
@@ -301,7 +306,7 @@ function MemoryMatchLevel({ onComplete }) {
         if (newFlipped.length === 2) {
             setChecking(true);
             const [a, b] = newFlipped;
-            if (cards[a].emoji === cards[b].emoji) {
+            if (cards[a].img === cards[b].img) {
                 const newMatched = [...matched, a, b];
                 setMatched(newMatched);
                 setFlipped([]);
@@ -330,7 +335,9 @@ function MemoryMatchLevel({ onComplete }) {
                             onClick={() => flipCard(i)}>
                             <div className={styles.memInner}>
                                 <div className={styles.memFront}>❤️</div>
-                                <div className={styles.memBack}>{card.emoji}</div>
+                                <div className={styles.memBack}>
+                                    <img src={card.img} alt="memory" className={styles.memImg} />
+                                </div>
                             </div>
                         </div>
                     );
@@ -816,15 +823,13 @@ function RunawayLevel({ onComplete }) {
 //  LEVEL 8 — GRAND CELEBRATION
 // ═══════════════════════════════════════════
 
-function CelebrationLevel() {
+function CelebrationLevel({ onComplete }) {
     const [letterText, setLetterText] = useState("");
     const [letterDone, setLetterDone] = useState(false);
-    const [showPhotos, setShowPhotos] = useState(false);
     const [showLetter, setShowLetter] = useState(false);
 
     useEffect(() => {
-        setTimeout(() => setShowPhotos(true), 800);
-        setTimeout(() => setShowLetter(true), 1800);
+        setTimeout(() => setShowLetter(true), 800);
     }, []);
 
     useEffect(() => {
@@ -849,6 +854,8 @@ function CelebrationLevel() {
         a.download = "My_Valentine_Letter.txt";
         a.click();
         URL.revokeObjectURL(url);
+
+        setTimeout(onComplete, 1000);
     };
 
     return (
@@ -857,16 +864,6 @@ function CelebrationLevel() {
                 <h1 className={styles.celebTitle}>My Forever Valentine 💑</h1>
                 <p className={styles.celebSub}>I choose you. Today and always.</p>
             </div>
-
-            {showPhotos && (
-                <div className={styles.photoGrid}>
-                    {PHOTOS.map((photo, i) => (
-                        <div key={i} className={styles.photoCard} style={{ "--delay": `${0.1 + i * 0.15}s` }}>
-                            <div className={styles.photoImg} style={{ backgroundImage: `url(${photo})` }} />
-                        </div>
-                    ))}
-                </div>
-            )}
 
             {showLetter && (
                 <div className={styles.letterCard}>
@@ -893,6 +890,66 @@ function CelebrationLevel() {
             )}
 
             <div style={{ height: 40 }} />
+        </div>
+    );
+}
+
+// ═══════════════════════════════════════════
+//  LEVEL 9 — FINAL SURPRISE COUNTDOWN
+// ═══════════════════════════════════════════
+
+function SurpriseLevel() {
+    const [showCountdown, setShowCountdown] = useState(false);
+    const [timeLeft, setTimeLeft] = useState("");
+
+    useEffect(() => {
+        const timer = setTimeout(() => setShowCountdown(true), 3500);
+        return () => clearTimeout(timer);
+    }, []);
+
+    useEffect(() => {
+        if (!showCountdown) return;
+
+        const target = new Date();
+        target.setHours(23, 11, 0, 0); // 11:11 PM
+
+        // If it's already past 11:11 PM, verify if we should show for tomorrow or just show 00:00:00
+        // For now, let's assume it's for today. If active user is past 11:11, maybe target tomorrow?
+        // User request: "countdown to 11:11 PM"
+        if (new Date() > target) {
+            target.setDate(target.getDate() + 1);
+        }
+
+        const interval = setInterval(() => {
+            const now = new Date();
+            const diff = target - now;
+
+            if (diff <= 0) {
+                setTimeLeft("00:00:00");
+                clearInterval(interval);
+                return;
+            }
+
+            const h = Math.floor(diff / (1000 * 60 * 60));
+            const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const s = Math.floor((diff % (1000 * 60)) / 1000);
+
+            setTimeLeft(`${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`);
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [showCountdown]);
+
+    return (
+        <div className={styles.surpriseWrap}>
+            {!showCountdown ? (
+                <h1 className={styles.surpriseText}>One more surprise is waiting for you... 🤫</h1>
+            ) : (
+                <>
+                    <h1 className={styles.surpriseText}>Open this at 11:11 PM ✨</h1>
+                    <div className={styles.countdown}>{timeLeft}</div>
+                </>
+            )}
         </div>
     );
 }
@@ -966,7 +1023,8 @@ export default function Day8() {
                 {level === 5 && <ScratchCardLevel onComplete={nextLevel} />}
                 {level === 6 && <HeartCatchLevel onComplete={nextLevel} />}
                 {level === 7 && <RunawayLevel onComplete={nextLevel} />}
-                {level === 8 && <CelebrationLevel />}
+                {level === 8 && <CelebrationLevel onComplete={nextLevel} />}
+                {level === 9 && <SurpriseLevel />}
             </div>
         </div>
     );
