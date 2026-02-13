@@ -3,24 +3,25 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import styles from "./Day8.module.css";
 
-// ── Photos for the Grand Finale ──
-// Using the best photos from all days for the final collage
+// ═══════════════════════════════════════════
+//  CONSTANTS & DATA
+// ═══════════════════════════════════════════
+
 const PHOTOS = [
     "/Propose-Day-pics/IMG_1486.JPG",
     "/Propose-Day-pics/IMG_3569.JPG",
     "/Rose-Day-pics/IMG_2624.JPG",
     "/Hug-Day-pics/IMG_3657.jpg",
 ];
-
 const POLAROID = "/Propose-Day-pics/IMG_3249.jpg";
 
-const FINAL_LETTER_TEXT = `My Dearest Pepito,
+const FINAL_LETTER = `My Dearest Pepito,
 
-If you are reading this, it means you made it through a week of my silly digital surprises.
+If you are reading this, it means you made it through a week of my silly digital surprises — and today's little adventure too.
 Thank you for playing along.
 
 This website was just a small way to show you what you mean to me.
-Every click, every rose, every reveal... it was all just an excuse to make you smile.
+Every click, every puzzle, every reveal... it was all just an excuse to make you smile.
 
 This website ends today.
 But choosing you doesn't.
@@ -28,277 +29,689 @@ I will choose you tomorrow, and the day after, and every day that follows.
 
 You are my favorite notification.
 My favorite plan.
+My Bubbleyum Princess.
 My valentine.
 
 With all my love,
-Manoj ❤️`;
+Your Kitty ❤️`;
 
-// ── Sweet messages revealed on heart catch ──
-const CATCH_MESSAGES = [
-    "My Heart! ❤️",
-    "Forever Yours! 🌹",
-    "Be Mine? 💌",
-    "Love You! 💖",
-    "Soulmate ✨",
-    "Perfect Match 💑",
-    "Only You 💘",
-    "Always 💍",
-    "My Everything 🌍",
-    "True Love 🦢",
+// Level 1: Constellation — 10 points forming a heart
+const STARS = [
+    { x: 150, y: 255 },
+    { x: 88, y: 185 },
+    { x: 40, y: 125 },
+    { x: 48, y: 72 },
+    { x: 95, y: 42 },
+    { x: 150, y: 78 },
+    { x: 205, y: 42 },
+    { x: 252, y: 72 },
+    { x: 260, y: 125 },
+    { x: 212, y: 185 },
 ];
 
-// ── Generate a new floating heart with random physics ──
-const TOTAL_CATCHES = 14; // A bit longer for the finale
+// Level 2: Word scramble
+const SCRAMBLE_WORDS = [
+    { word: "GOA", scrambled: "OAG", hint: "Where our best memories live 🏖️" },
+    { word: "MOCHI", scrambled: "ICHMO", hint: "Her favorite Japanese treat 🍡" },
+    { word: "DANCE", scrambled: "ACNED", hint: "How our story began 💃" },
+    { word: "PEPITO", scrambled: "OPTIEP", hint: "Her sweetest nickname 💕" },
+];
+
+// Level 3: Memory match pairs
+const MEMORY_PAIRS = ["🍡", "🍰", "⭐", "🌙", "💃", "🏖️"];
+
+// Level 4: Quiz questions
+const QUIZ = [
+    { q: "What's our song?", opts: ["Shape of You", "We Are The People", "Perfect"], ans: 1 },
+    { q: "What does Manoj call Sanghu?", opts: ["Sugar Plum", "Bubbleyum Princess", "Honey Bear"], ans: 1 },
+    { q: "How did we first connect?", opts: ["At a cafe", "Through friends", "Asked her for a dance"], ans: 2 },
+    { q: "What's her favorite show?", opts: ["The Office", "F.R.I.E.N.D.S", "Brooklyn Nine-Nine"], ans: 1 },
+    { q: "What makes Manoj smile most about her?", opts: ["Her cooking", "Her weird noises", "Her texts"], ans: 1 },
+];
+
+// Level 5: Scratch card reasons
+const LOVE_REASONS = [
+    "The childlike spirit in you ✨",
+    "I just love being with you 💕",
+    "Your presence makes everything better 🌟",
+    "You're my Bubbleyum Princess 👑",
+    "Your weird noises make my day 😄",
+];
+
+// Level 6: Heart catch
+const HEARTS_NEEDED = 8;
+const CATCH_MSGS = [
+    "My Heart! ❤️", "Forever! 🌹", "Be Mine! 💌", "Love You! 💖",
+    "Soulmate ✨", "Only You 💘", "Always 💍", "True Love 🦢",
+];
+
+const TOTAL_LEVELS = 7;
+
 let heartIdCounter = 0;
-
-const createHeart = (screenW, screenH) => {
+const makeHeart = (w, h) => {
     const id = heartIdCounter++;
-    const isGolden = id > 0 && id % 5 === 0;
-    const size = isGolden ? 70 : 50 + Math.random() * 25;
-
-    // Start from a random edge
+    const isGolden = id > 0 && id % 4 === 0;
+    const size = isGolden ? 65 : 45 + Math.random() * 20;
     const edge = Math.floor(Math.random() * 4);
     let x, y;
     switch (edge) {
-        case 0: x = Math.random() * (screenW - size); y = -size; break;
-        case 1: x = screenW; y = Math.random() * (screenH - size); break;
-        case 2: x = Math.random() * (screenW - size); y = screenH; break;
-        default: x = -size; y = Math.random() * (screenH - size); break;
+        case 0: x = Math.random() * (w - size); y = -size; break;
+        case 1: x = w; y = Math.random() * (h - size); break;
+        case 2: x = Math.random() * (w - size); y = h; break;
+        default: x = -size; y = Math.random() * (h - size); break;
     }
-
-    // Velocity toward center with randomness
-    const cx = screenW / 2 + (Math.random() - 0.5) * screenW * 0.5;
-    const cy = screenH / 2 + (Math.random() - 0.5) * screenH * 0.5;
+    const cx = w / 2 + (Math.random() - 0.5) * w * 0.4;
+    const cy = h / 2 + (Math.random() - 0.5) * h * 0.4;
     const angle = Math.atan2(cy - y, cx - x);
-    const speed = 0.5 + Math.random() * 0.9;
-
-    return {
-        id,
-        x, y,
-        vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed,
-        size,
-        isGolden,
-        // Heart bounce animation params
-        bounceDelay: Math.random(),
-        born: Date.now(),
-    };
+    const speed = 0.5 + Math.random() * 0.8;
+    return { id, x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, size, isGolden };
 };
 
-// ── Petals / Confetti ──
-const makePetals = (n) =>
-    Array.from({ length: n }, (_, i) => ({
-        id: i,
-        emoji: ['❤️', '💖', '✨', '🌹', '🦋'][i % 5],
-        left: Math.random() * 100,
-        delay: Math.random() * 8,
-        dur: 8 + Math.random() * 6,
-    }));
+// ═══════════════════════════════════════════
+//  LEVEL 0 — INTRO
+// ═══════════════════════════════════════════
 
-// SVG ring
-const R = 95;
-const C = 2 * Math.PI * R;
-const HOLD_MS = 3500; // Slightly longer hold for final day
+function IntroLevel({ onStart }) {
+    const [visible, setVisible] = useState(false);
+    useEffect(() => { setTimeout(() => setVisible(true), 300); }, []);
 
-export default function Day8() {
-    // ── Phase ──
-    const [phase, setPhase] = useState('game');
-    // 'game' | 'hold' | 'explosion' | 'celebration'
+    return (
+        <div className={`${styles.introWrap} ${visible ? styles.introVisible : ""}`}>
+            <div className={styles.introEmoji}>💝</div>
+            <h1 className={styles.introTitle}>Happy Valentine&apos;s Day</h1>
+            <p className={styles.introSub}>A special adventure awaits you, Pepito...</p>
+            <p className={styles.introDesc}>7 levels of love, puzzles & surprises</p>
+            <button className={styles.startBtn} onClick={onStart}>
+                Begin the Adventure ✨
+            </button>
+        </div>
+    );
+}
 
-    const [petals] = useState(() => makePetals(15));
+// ═══════════════════════════════════════════
+//  LEVEL 1 — CONSTELLATION CONNECT
+// ═══════════════════════════════════════════
 
-    // ── Game state ──
+function ConstellationLevel({ onComplete }) {
+    const [lit, setLit] = useState([]);
+    const [complete, setComplete] = useState(false);
+    const nextIdx = lit.length;
+
+    const tapStar = (idx) => {
+        if (idx !== nextIdx || complete) return;
+        if (window.navigator?.vibrate) window.navigator.vibrate(25);
+        const newLit = [...lit, idx];
+        setLit(newLit);
+        if (newLit.length === STARS.length) {
+            setComplete(true);
+            setTimeout(onComplete, 2200);
+        }
+    };
+
+    return (
+        <div className={styles.levelWrap}>
+            <h2 className={styles.levelTitle}>Written in the Stars ⭐</h2>
+            <p className={styles.levelSub}>Tap the glowing star to trace our constellation</p>
+            <svg className={styles.conSvg} viewBox="0 0 300 300">
+                {/* Background twinkling stars */}
+                {Array.from({ length: 40 }, (_, i) => (
+                    <circle key={`bg${i}`} cx={Math.random() * 300} cy={Math.random() * 300}
+                        r={0.5 + Math.random() * 1.2} fill="rgba(255,255,255,0.4)"
+                        className={styles.bgStar} style={{ "--twinkle-delay": `${Math.random() * 4}s` }} />
+                ))}
+
+                {/* Connection lines */}
+                {lit.map((starIdx, i) => {
+                    if (i === 0) return null;
+                    const prev = STARS[lit[i - 1]];
+                    const curr = STARS[starIdx];
+                    return (
+                        <line key={`l${i}`} x1={prev.x} y1={prev.y} x2={curr.x} y2={curr.y}
+                            className={styles.conLine} />
+                    );
+                })}
+                {complete && (
+                    <line x1={STARS[lit[lit.length - 1]].x} y1={STARS[lit[lit.length - 1]].y}
+                        x2={STARS[lit[0]].x} y2={STARS[lit[0]].y} className={styles.conLine} />
+                )}
+
+                {/* Interactive stars */}
+                {STARS.map((star, i) => {
+                    const isLit = lit.includes(i);
+                    const isNext = i === nextIdx && !complete;
+                    return (
+                        <g key={i} onClick={() => tapStar(i)} style={{ cursor: isNext ? "pointer" : "default" }}>
+                            {isNext && (
+                                <circle cx={star.x} cy={star.y} r={20} className={styles.starPulse} />
+                            )}
+                            <circle cx={star.x} cy={star.y} r={22} fill="transparent" />
+                            <circle cx={star.x} cy={star.y} r={isLit ? 8 : isNext ? 7 : 4}
+                                className={`${styles.starDot} ${isLit ? styles.starLit : ""} ${isNext ? styles.starNext : ""}`} />
+                        </g>
+                    );
+                })}
+            </svg>
+            {complete && <p className={styles.completeMsg}>Our love is written in the stars ❤️</p>}
+        </div>
+    );
+}
+
+// ═══════════════════════════════════════════
+//  LEVEL 2 — WORD SCRAMBLE
+// ═══════════════════════════════════════════
+
+function WordScrambleLevel({ onComplete }) {
+    const [wordIdx, setWordIdx] = useState(0);
+    const [selected, setSelected] = useState([]);
+    const [solved, setSolved] = useState(false);
+    const [shake, setShake] = useState(false);
+
+    const current = SCRAMBLE_WORDS[wordIdx];
+    const letters = current.scrambled.split("");
+    const target = current.word;
+
+    const tapLetter = (idx) => {
+        if (selected.includes(idx) || solved) return;
+        if (window.navigator?.vibrate) window.navigator.vibrate(15);
+
+        const newSelected = [...selected, idx];
+        const built = newSelected.map((i) => letters[i]).join("");
+        const expected = target.substring(0, newSelected.length);
+
+        if (built !== expected) {
+            setShake(true);
+            if (window.navigator?.vibrate) window.navigator.vibrate([40, 20, 40]);
+            setTimeout(() => { setSelected([]); setShake(false); }, 500);
+            return;
+        }
+
+        setSelected(newSelected);
+
+        if (newSelected.length === target.length) {
+            setSolved(true);
+            if (window.navigator?.vibrate) window.navigator.vibrate([30, 20, 60]);
+            setTimeout(() => {
+                if (wordIdx + 1 < SCRAMBLE_WORDS.length) {
+                    setWordIdx((prev) => prev + 1);
+                    setSelected([]);
+                    setSolved(false);
+                } else {
+                    onComplete();
+                }
+            }, 1200);
+        }
+    };
+
+    return (
+        <div className={styles.levelWrap}>
+            <h2 className={styles.levelTitle}>Unscramble My Heart 💌</h2>
+            <p className={styles.levelSub}>{current.hint}</p>
+            <div className={styles.wordDots}>
+                {SCRAMBLE_WORDS.map((_, i) => (
+                    <div key={i} className={`${styles.dot} ${i < wordIdx ? styles.dotDone : i === wordIdx ? styles.dotActive : ""}`} />
+                ))}
+            </div>
+            <div className={styles.answerRow}>
+                {target.split("").map((_, i) => (
+                    <div key={i} className={`${styles.slot} ${selected[i] !== undefined ? styles.slotFilled : ""}`}>
+                        {selected[i] !== undefined ? letters[selected[i]] : ""}
+                    </div>
+                ))}
+            </div>
+            <div className={`${styles.letterRow} ${shake ? styles.shake : ""}`}>
+                {letters.map((letter, i) => (
+                    <button key={i} className={`${styles.tile} ${selected.includes(i) ? styles.tileUsed : ""}`}
+                        onClick={() => tapLetter(i)} disabled={selected.includes(i)}>
+                        {letter}
+                    </button>
+                ))}
+            </div>
+            {selected.length > 0 && !solved && (
+                <button className={styles.clearBtn} onClick={() => setSelected([])}>Clear</button>
+            )}
+            {solved && <p className={styles.solvedText}>✨ {target}! ✨</p>}
+        </div>
+    );
+}
+
+// ═══════════════════════════════════════════
+//  LEVEL 3 — MEMORY MATCH
+// ═══════════════════════════════════════════
+
+function MemoryMatchLevel({ onComplete }) {
+    const [cards] = useState(() => {
+        const deck = [...MEMORY_PAIRS, ...MEMORY_PAIRS].map((emoji, i) => ({ id: i, emoji }));
+        for (let i = deck.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [deck[i], deck[j]] = [deck[j], deck[i]];
+        }
+        return deck;
+    });
+    const [flipped, setFlipped] = useState([]);
+    const [matched, setMatched] = useState([]);
+    const [checking, setChecking] = useState(false);
+
+    const flipCard = (idx) => {
+        if (checking || flipped.includes(idx) || matched.includes(idx)) return;
+        if (window.navigator?.vibrate) window.navigator.vibrate(15);
+
+        const newFlipped = [...flipped, idx];
+        setFlipped(newFlipped);
+
+        if (newFlipped.length === 2) {
+            setChecking(true);
+            const [a, b] = newFlipped;
+            if (cards[a].emoji === cards[b].emoji) {
+                const newMatched = [...matched, a, b];
+                setMatched(newMatched);
+                setFlipped([]);
+                setChecking(false);
+                if (window.navigator?.vibrate) window.navigator.vibrate([20, 15, 40]);
+                if (newMatched.length === cards.length) {
+                    setTimeout(onComplete, 1200);
+                }
+            } else {
+                setTimeout(() => { setFlipped([]); setChecking(false); }, 900);
+            }
+        }
+    };
+
+    return (
+        <div className={styles.levelWrap}>
+            <h2 className={styles.levelTitle}>Match Made in Heaven 💑</h2>
+            <p className={styles.levelSub}>Find all the matching pairs</p>
+            <div className={styles.memGrid}>
+                {cards.map((card, i) => {
+                    const isOpen = flipped.includes(i) || matched.includes(i);
+                    const isMatched = matched.includes(i);
+                    return (
+                        <div key={card.id}
+                            className={`${styles.memCard} ${isOpen ? styles.memOpen : ""} ${isMatched ? styles.memMatched : ""}`}
+                            onClick={() => flipCard(i)}>
+                            <div className={styles.memInner}>
+                                <div className={styles.memFront}>❤️</div>
+                                <div className={styles.memBack}>{card.emoji}</div>
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+            <p className={styles.matchCount}>{matched.length / 2} / {MEMORY_PAIRS.length} pairs found</p>
+        </div>
+    );
+}
+
+// ═══════════════════════════════════════════
+//  LEVEL 4 — QUIZ
+// ═══════════════════════════════════════════
+
+const WRONG_MSGS = ["Hmm, not quite! 😜", "Try harder next time! 😄", "Oops! 💫", "Almost! 🤭", "Nope! 🙈"];
+
+function QuizLevel({ onComplete }) {
+    const [qIdx, setQIdx] = useState(0);
+    const [score, setScore] = useState(0);
+    const [answered, setAnswered] = useState(null);
+    const [done, setDone] = useState(false);
+
+    const current = QUIZ[qIdx];
+
+    const answer = (optIdx) => {
+        if (answered !== null) return;
+        setAnswered(optIdx);
+        const correct = optIdx === current.ans;
+        if (window.navigator?.vibrate) window.navigator.vibrate(correct ? 25 : [40, 20, 40]);
+        if (correct) setScore((s) => s + 1);
+
+        setTimeout(() => {
+            if (qIdx + 1 < QUIZ.length) {
+                setQIdx((prev) => prev + 1);
+                setAnswered(null);
+            } else {
+                setDone(true);
+                setTimeout(onComplete, 2000);
+            }
+        }, 1500);
+    };
+
+    if (done) {
+        return (
+            <div className={styles.levelWrap}>
+                <h2 className={styles.levelTitle}>How Well Do You Know Me? 💭</h2>
+                <div className={styles.quizDone}>
+                    <div className={styles.quizScoreBig}>{score} / {QUIZ.length}</div>
+                    <p className={styles.quizScoreMsg}>
+                        {score === QUIZ.length ? "Perfect! You know me inside out! 💕" :
+                            score >= 3 ? "Not bad! You know me well! 💖" :
+                                "We have so much more to discover together! 💫"}
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className={styles.levelWrap}>
+            <h2 className={styles.levelTitle}>How Well Do You Know Me? 💭</h2>
+            <p className={styles.quizProgress}>Question {qIdx + 1} of {QUIZ.length}</p>
+            <div className={styles.quizCard}>
+                <p className={styles.quizQ}>{current.q}</p>
+                <div className={styles.quizOpts}>
+                    {current.opts.map((opt, i) => (
+                        <button key={i}
+                            className={`${styles.quizOpt} ${answered === i ? (i === current.ans ? styles.quizCorrect : styles.quizWrong) : ""} ${answered !== null && i === current.ans ? styles.quizCorrect : ""}`}
+                            onClick={() => answer(i)} disabled={answered !== null}>
+                            {opt}
+                        </button>
+                    ))}
+                </div>
+                {answered !== null && answered !== current.ans && (
+                    <p className={styles.quizFeedback}>{WRONG_MSGS[qIdx % WRONG_MSGS.length]}</p>
+                )}
+                {answered !== null && answered === current.ans && (
+                    <p className={styles.quizFeedbackGood}>You know me so well! ❤️</p>
+                )}
+            </div>
+        </div>
+    );
+}
+
+// ═══════════════════════════════════════════
+//  LEVEL 5 — SCRATCH CARDS
+// ═══════════════════════════════════════════
+
+function ScratchCard({ reason, onRevealed }) {
+    const canvasRef = useRef(null);
+    const [revealed, setRevealed] = useState(false);
+    const scratchCount = useRef(0);
+    const isDrawing = useRef(false);
+
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext("2d");
+        const w = canvas.width, h = canvas.height;
+
+        const grad = ctx.createLinearGradient(0, 0, w, h);
+        grad.addColorStop(0, "#ff3366");
+        grad.addColorStop(0.5, "#ff4d6d");
+        grad.addColorStop(1, "#c44569");
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, w, h);
+
+        ctx.fillStyle = "rgba(255,255,255,0.25)";
+        for (let i = 0; i < 40; i++) {
+            ctx.beginPath();
+            ctx.arc(Math.random() * w, Math.random() * h, 1 + Math.random() * 2, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        ctx.font = "600 14px Nunito, sans-serif";
+        ctx.fillStyle = "rgba(255,255,255,0.7)";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("Scratch me! ✨", w / 2, h / 2);
+    }, []);
+
+    const scratch = useCallback((clientX, clientY) => {
+        const canvas = canvasRef.current;
+        if (!canvas || revealed) return;
+        const ctx = canvas.getContext("2d");
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        const x = (clientX - rect.left) * scaleX;
+        const y = (clientY - rect.top) * scaleY;
+
+        ctx.globalCompositeOperation = "destination-out";
+        ctx.beginPath();
+        ctx.arc(x, y, 20, 0, Math.PI * 2);
+        ctx.fill();
+
+        scratchCount.current++;
+        if (scratchCount.current > 20 && !revealed) {
+            setRevealed(true);
+            if (window.navigator?.vibrate) window.navigator.vibrate([20, 15, 30]);
+            onRevealed();
+        }
+    }, [revealed, onRevealed]);
+
+    const handleMouseDown = useCallback((e) => {
+        isDrawing.current = true;
+        scratch(e.clientX, e.clientY);
+    }, [scratch]);
+
+    const handleMouseMove = useCallback((e) => {
+        if (isDrawing.current) scratch(e.clientX, e.clientY);
+    }, [scratch]);
+
+    const handleMouseUp = useCallback(() => { isDrawing.current = false; }, []);
+
+    const handleTouchMove = useCallback((e) => {
+        e.preventDefault();
+        scratch(e.touches[0].clientX, e.touches[0].clientY);
+    }, [scratch]);
+
+    const handleTouchStart = useCallback((e) => {
+        e.preventDefault();
+        scratch(e.touches[0].clientX, e.touches[0].clientY);
+    }, [scratch]);
+
+    return (
+        <div className={`${styles.scratchCard} ${revealed ? styles.scratchRevealed : ""}`}>
+            <div className={styles.scratchMsg}>{reason}</div>
+            <canvas ref={canvasRef} width={260} height={80}
+                className={`${styles.scratchCanvas} ${revealed ? styles.scratchCanvasDone : ""}`}
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove} />
+        </div>
+    );
+}
+
+function ScratchCardLevel({ onComplete }) {
+    const [revealedCount, setRevealedCount] = useState(0);
+
+    const handleRevealed = useCallback(() => {
+        setRevealedCount((prev) => {
+            const next = prev + 1;
+            if (next >= LOVE_REASONS.length) {
+                setTimeout(onComplete, 1500);
+            }
+            return next;
+        });
+    }, [onComplete]);
+
+    return (
+        <div className={styles.levelWrap}>
+            <h2 className={styles.levelTitle}>Scratch & Discover 💝</h2>
+            <p className={styles.levelSub}>Scratch each card to discover why I love you</p>
+            <div className={styles.scratchGrid}>
+                {LOVE_REASONS.map((reason, i) => (
+                    <ScratchCard key={i} reason={reason} onRevealed={handleRevealed} />
+                ))}
+            </div>
+            <p className={styles.matchCount}>{revealedCount} / {LOVE_REASONS.length} discovered</p>
+        </div>
+    );
+}
+
+// ═══════════════════════════════════════════
+//  LEVEL 6 — HEART CATCH
+// ═══════════════════════════════════════════
+
+function HeartCatchLevel({ onComplete }) {
     const [hearts, setHearts] = useState([]);
     const [catches, setCatches] = useState(0);
-    const [popEffects, setPopEffects] = useState([]);
-    const [sparkles, setSparkles] = useState([]);
-    const [floatMsgs, setFloatMsgs] = useState([]);
-    const [caughtMarks, setCaughtMarks] = useState([]);
-
-    // ── Hold state ──
-    const [holdProgress, setHoldProgress] = useState(0);
-    const [isPressing, setIsPressing] = useState(false);
-    const [holdSparkles, setHoldSparkles] = useState([]);
-    const [showFlash, setShowFlash] = useState(false);
-    const [explosion, setExplosion] = useState([]);
-
-    const canvasRef = useRef(null);
+    const [effects, setEffects] = useState([]);
     const heartsRef = useRef([]);
     const frameRef = useRef(null);
     const catchesRef = useRef(0);
-    const holdStart = useRef(null);
-    const holdFrame = useRef(null);
     const screenRef = useRef({ w: 0, h: 0 });
 
-    // ── Preload fonts ──
     useEffect(() => {
-        const link = document.createElement('link');
-        link.href = 'https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&family=Pacifico&family=Quicksand:wght@400;600;700&display=swap';
-        link.rel = 'stylesheet';
-        document.head.appendChild(link);
-        return () => document.head.removeChild(link);
-    }, []);
-
-    // ── Initialize game ──
-    useEffect(() => {
-        if (phase !== 'game') return;
-
         const w = window.innerWidth;
         const h = window.innerHeight;
         screenRef.current = { w, h };
-
-        // Spawn initial hearts
-        const initial = Array.from({ length: 4 }, () => createHeart(w, h));
+        heartIdCounter = 0;
+        const initial = Array.from({ length: 3 }, () => makeHeart(w, h));
         heartsRef.current = initial;
         setHearts(initial);
 
-        // Physics loop
         const tick = () => {
             const sw = screenRef.current.w;
             const sh = screenRef.current.h;
-
-            heartsRef.current = heartsRef.current.map(h => {
-                let nx = h.x + h.vx;
-                let ny = h.y + h.vy;
-                let nvx = h.vx;
-                let nvy = h.vy;
-
-                // Soft boundary bounce
-                const margin = 20;
-                if (nx < margin) { nvx = Math.abs(nvx) * 0.9 + 0.1; nx = margin; }
-                if (nx > sw - h.size - margin) { nvx = -Math.abs(nvx) * 0.9 - 0.1; nx = sw - h.size - margin; }
-                if (ny < margin + 100) { nvy = Math.abs(nvy) * 0.9 + 0.15; ny = margin + 100; }
-                if (ny > sh - h.size - margin) { nvy = -Math.abs(nvy) * 0.9 - 0.15; ny = sh - h.size - margin; }
-
-                // Drift
+            heartsRef.current = heartsRef.current.map((ht) => {
+                let nx = ht.x + ht.vx, ny = ht.y + ht.vy;
+                let nvx = ht.vx, nvy = ht.vy;
+                if (nx < 20) { nvx = Math.abs(nvx) * 0.9 + 0.1; nx = 20; }
+                if (nx > sw - ht.size - 20) { nvx = -Math.abs(nvx) * 0.9 - 0.1; nx = sw - ht.size - 20; }
+                if (ny < 120) { nvy = Math.abs(nvy) * 0.9 + 0.15; ny = 120; }
+                if (ny > sh - ht.size - 20) { nvy = -Math.abs(nvy) * 0.9 - 0.15; ny = sh - ht.size - 20; }
                 nvx += (Math.random() - 0.5) * 0.03;
                 nvy += (Math.random() - 0.5) * 0.03;
-
-                return { ...h, x: nx, y: ny, vx: nvx, vy: nvy };
+                return { ...ht, x: nx, y: ny, vx: nvx, vy: nvy };
             });
-
             setHearts([...heartsRef.current]);
             frameRef.current = requestAnimationFrame(tick);
         };
-
         frameRef.current = requestAnimationFrame(tick);
         return () => { if (frameRef.current) cancelAnimationFrame(frameRef.current); };
-    }, [phase]);
+    }, []);
 
-    // ── Handle catch ──
-    const handleCatch = useCallback((heartObj, e) => {
+    const catchHeart = useCallback((heart, e) => {
         e.stopPropagation();
-        if (window.navigator?.vibrate) window.navigator.vibrate(heartObj.isGolden ? [60, 40, 60] : 30);
+        if (window.navigator?.vibrate) window.navigator.vibrate(heart.isGolden ? [40, 25, 40] : 25);
+        heartsRef.current = heartsRef.current.filter((h) => h.id !== heart.id);
 
         const rect = e.currentTarget.getBoundingClientRect();
         const cx = rect.left + rect.width / 2;
         const cy = rect.top + rect.height / 2;
+        const msg = CATCH_MSGS[catchesRef.current % CATCH_MSGS.length];
+        const effectId = Date.now() + Math.random();
+        setEffects((prev) => [...prev, { id: effectId, x: cx, y: cy, msg }]);
+        setTimeout(() => setEffects((prev) => prev.filter((ef) => ef.id !== effectId)), 2000);
 
-        // Remove
-        heartsRef.current = heartsRef.current.filter(h => h.id !== heartObj.id);
-
-        // Mark
-        setCaughtMarks(prev => [...prev, { id: heartObj.id, x: cx, y: cy, size: heartObj.isGolden ? '2.2rem' : '1.6rem' }]);
-
-        // Pop ring
-        const popId = Date.now() + Math.random();
-        setPopEffects(prev => [...prev, {
-            id: popId, x: cx, y: cy, size: heartObj.size,
-            color: heartObj.isGolden ? 'rgba(255,215,0,0.4)' : 'rgba(255,50,100,0.3)',
-        }]);
-        setTimeout(() => setPopEffects(prev => prev.filter(p => p.id !== popId)), 500);
-
-        // Sparkles
-        const newSparkles = Array.from({ length: heartObj.isGolden ? 10 : 6 }, (_, i) => {
-            const angle = (i / 8) * Math.PI * 2 + Math.random() * 0.5;
-            const dist = 40 + Math.random() * 60;
-            return {
-                id: Date.now() + Math.random() + i,
-                x: cx, y: cy,
-                emoji: ['✨', '❤️', '💖', '🌸', '⭐'][i % 5],
-                sx: `${Math.cos(angle) * dist}px`,
-                sy: `${Math.sin(angle) * dist}px`,
-                sr: `${(Math.random() - 0.5) * 360}deg`,
-            };
-        });
-        setSparkles(prev => [...prev, ...newSparkles]);
-        setTimeout(() => setSparkles(prev => prev.filter(s => !newSparkles.find(ns => ns.id === s.id))), 800);
-
-        // Message
-        const msg = CATCH_MESSAGES[Math.floor(Math.random() * CATCH_MESSAGES.length)];
-        const msgId = Date.now() + Math.random();
-        setFloatMsgs(prev => [...prev, { id: msgId, text: msg, x: cx, y: cy - 10 }]);
-        setTimeout(() => setFloatMsgs(prev => prev.filter(m => m.id !== msgId)), 2200);
-
-        // Count
         const newCatches = catchesRef.current + 1;
         catchesRef.current = newCatches;
         setCatches(newCatches);
 
-        if (newCatches >= TOTAL_CATCHES) {
+        if (newCatches >= HEARTS_NEEDED) {
             setTimeout(() => {
                 if (frameRef.current) cancelAnimationFrame(frameRef.current);
-                setPhase('hold');
+                onComplete();
             }, 800);
         } else {
             setTimeout(() => {
-                const replacement = createHeart(screenRef.current.w, screenRef.current.h);
-                heartsRef.current.push(replacement);
-                // Ramp up difficulty
-                if (newCatches > 6 && Math.random() > 0.5 && heartsRef.current.length < 6) {
-                    heartsRef.current.push(createHeart(screenRef.current.w, screenRef.current.h));
+                heartsRef.current.push(makeHeart(screenRef.current.w, screenRef.current.h));
+                if (newCatches > 4 && heartsRef.current.length < 4) {
+                    heartsRef.current.push(makeHeart(screenRef.current.w, screenRef.current.h));
                 }
             }, 300);
         }
-    }, []);
+    }, [onComplete]);
 
-    // ── Hold mechanic ──
-    const spawnHoldSparkle = useCallback(() => {
-        const ang = Math.random() * Math.PI * 2;
-        const dist = 55 + Math.random() * 85;
-        const s = {
-            id: Date.now() + Math.random(),
-            emoji: ['✨', '❤️', '💖', '🌹', '💑'][Math.floor(Math.random() * 5)],
-            x: `${Math.cos(ang) * dist}px`,
-            y: `${Math.sin(ang) * dist}px`,
-            r: `${(Math.random() - 0.5) * 360}deg`,
-            dur: `${1 + Math.random() * 0.5}s`,
-        };
-        setHoldSparkles(prev => [...prev, s]);
-        setTimeout(() => setHoldSparkles(prev => prev.filter(z => z.id !== s.id)), 1500);
-    }, []);
+    const progress = (catches / HEARTS_NEEDED) * 100;
+
+    return (
+        <>
+            <div className={styles.catchHud}>
+                <h2 className={styles.levelTitle}>Catch My Heart ❤️</h2>
+                <p className={styles.levelSub}>catch all the floating hearts!</p>
+                <div className={styles.progressBar}>
+                    <div className={styles.progressFill} style={{ width: `${progress}%` }} />
+                </div>
+                <span className={styles.scoreText}>{catches} / {HEARTS_NEEDED}</span>
+            </div>
+            <div className={styles.gameCanvas}>
+                {hearts.map((h) => (
+                    <div key={h.id}
+                        className={`${styles.heartTarget} ${h.isGolden ? styles.heartGolden : ""}`}
+                        onClick={(e) => catchHeart(h, e)}
+                        style={{ left: h.x, top: h.y, width: h.size, height: h.size }}>
+                        <div className={styles.heartInner}
+                            style={{ "--heart-glow": h.isGolden ? "rgba(255,215,0,0.35)" : "rgba(255,50,100,0.25)" }}>
+                            <span className={styles.heartEmoji}
+                                style={{ fontSize: h.isGolden ? "2.8rem" : "2rem" }}>
+                                ❤️
+                            </span>
+                        </div>
+                    </div>
+                ))}
+            </div>
+            {effects.map((ef) => (
+                <div key={ef.id} className={styles.floatMessage} style={{ left: ef.x, top: ef.y }}>
+                    {ef.msg}
+                </div>
+            ))}
+        </>
+    );
+}
+
+// ═══════════════════════════════════════════
+//  LEVEL 7 — RUNAWAY BUTTON + HOLD
+// ═══════════════════════════════════════════
+
+const NO_TEXTS = ["No", "Are you sure?", "Really??", "Think again!", "Please? 🥺", "..."];
+const R = 95;
+const CIRC = 2 * Math.PI * R;
+const HOLD_MS = 3000;
+
+function RunawayLevel({ onComplete }) {
+    const [noPos, setNoPos] = useState({ x: 60, y: 55 });
+    const [noIdx, setNoIdx] = useState(0);
+    const [yesScale, setYesScale] = useState(1);
+    const [phase, setPhase] = useState("question");
+    const [holdProgress, setHoldProgress] = useState(0);
+    const [isPressing, setIsPressing] = useState(false);
+    const [showFlash, setShowFlash] = useState(false);
+    const [explosion, setExplosion] = useState([]);
+    const holdStartRef = useRef(null);
+    const holdFrameRef = useRef(null);
+
+    const dodgeNo = () => {
+        if (window.navigator?.vibrate) window.navigator.vibrate([30, 15, 30]);
+        setNoPos({ x: 10 + Math.random() * 65, y: 20 + Math.random() * 55 });
+        setNoIdx((prev) => Math.min(prev + 1, NO_TEXTS.length - 1));
+        setYesScale((prev) => Math.min(prev + 0.12, 1.9));
+    };
+
+    const clickYes = () => {
+        if (window.navigator?.vibrate) window.navigator.vibrate([50, 30, 100]);
+        setPhase("hold");
+    };
 
     const startHold = useCallback((e) => {
         e.preventDefault();
-        if (phase !== 'hold') return;
+        if (phase !== "hold") return;
         setIsPressing(true);
-        holdStart.current = performance.now() - (holdProgress / 100) * HOLD_MS;
-        if (window.navigator?.vibrate) window.navigator.vibrate(30);
+        holdStartRef.current = performance.now() - (holdProgress / 100) * HOLD_MS;
+        if (window.navigator?.vibrate) window.navigator.vibrate(25);
 
-        let lastSpark = 0;
         const animate = (now) => {
-            const elapsed = now - holdStart.current;
+            const elapsed = now - holdStartRef.current;
             const prog = Math.min((elapsed / HOLD_MS) * 100, 100);
             setHoldProgress(prog);
-
-            const interval = Math.max(70, 300 - prog * 2.2);
-            if (now - lastSpark > interval) { spawnHoldSparkle(); lastSpark = now; }
-
-            if (prog >= 100) { triggerFinale(); return; }
-            holdFrame.current = requestAnimationFrame(animate);
+            if (prog >= 100) {
+                setIsPressing(false);
+                triggerFinale();
+                return;
+            }
+            holdFrameRef.current = requestAnimationFrame(animate);
         };
-        holdFrame.current = requestAnimationFrame(animate);
-    }, [phase, holdProgress, spawnHoldSparkle]);
+        holdFrameRef.current = requestAnimationFrame(animate);
+    }, [phase, holdProgress]);
 
     const endHold = useCallback(() => {
         setIsPressing(false);
-        if (holdFrame.current) { cancelAnimationFrame(holdFrame.current); holdFrame.current = null; }
-        // Decay
-        if (phase === 'hold' && holdProgress < 100) {
+        if (holdFrameRef.current) { cancelAnimationFrame(holdFrameRef.current); holdFrameRef.current = null; }
+        if (phase === "hold" && holdProgress < 100) {
             const decay = () => {
-                setHoldProgress(prev => {
+                setHoldProgress((prev) => {
                     if (prev <= 0) return 0;
-                    const n = prev - 1.2;
+                    const n = prev - 1.5;
                     if (n > 0) requestAnimationFrame(decay);
                     return Math.max(0, n);
                 });
@@ -307,15 +720,9 @@ export default function Day8() {
         }
     }, [phase, holdProgress]);
 
-    useEffect(() => {
-        return () => { if (holdFrame.current) cancelAnimationFrame(holdFrame.current); };
-    }, []);
-
     const triggerFinale = useCallback(() => {
-        setIsPressing(false);
-        if (holdFrame.current) cancelAnimationFrame(holdFrame.current);
+        if (holdFrameRef.current) cancelAnimationFrame(holdFrameRef.current);
         if (window.navigator?.vibrate) window.navigator.vibrate([100, 50, 100, 50, 300]);
-
         setShowFlash(true);
         setTimeout(() => setShowFlash(false), 1200);
 
@@ -324,7 +731,7 @@ export default function Day8() {
             const d = 140 + Math.random() * 240;
             return {
                 id: i,
-                emoji: ['❤️', '💖', '✨', '🌹', '💍', '💌', '🦢'][i % 7],
+                emoji: ["❤️", "💖", "✨", "🌹", "💍", "💌", "🦢"][i % 7],
                 ex: `${Math.cos(a) * d}px`,
                 ey: `${Math.sin(a) * d}px`,
                 er: `${(Math.random() - 0.5) * 720}deg`,
@@ -332,14 +739,111 @@ export default function Day8() {
             };
         });
         setExplosion(parts);
-        setPhase('explosion');
-        setTimeout(() => { setPhase('celebration'); setExplosion([]); }, 1800);
+        setPhase("explosion");
+        setTimeout(() => { setExplosion([]); onComplete(); }, 1800);
+    }, [onComplete]);
+
+    useEffect(() => {
+        return () => { if (holdFrameRef.current) cancelAnimationFrame(holdFrameRef.current); };
     }, []);
 
-    // ── Save Letter ──
+    const dashOffset = CIRC - (holdProgress / 100) * CIRC;
+    const hbSpeed = `${Math.max(0.3, 1.2 - (holdProgress / 100) * 0.9)}s`;
+
+    return (
+        <>
+            {showFlash && <div className={styles.flash} />}
+            {explosion.length > 0 && (
+                <div className={styles.explosionLayer}>
+                    {explosion.map((ep) => (
+                        <div key={ep.id} className={styles.explosionPart}
+                            style={{ "--ex": ep.ex, "--ey": ep.ey, "--er": ep.er, fontSize: ep.fs }}>
+                            {ep.emoji}
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            {phase === "question" && (
+                <div className={styles.levelWrap}>
+                    <h2 className={styles.levelTitle}>The Final Question 💍</h2>
+                    <p className={styles.runawayQ}>Will you be my Valentine forever?</p>
+                    <div className={styles.runawayArea}>
+                        <button className={styles.yesBtn} onClick={clickYes}
+                            style={{ transform: `scale(${yesScale})` }}>
+                            Yes! ❤️
+                        </button>
+                        <button className={styles.noBtn} onClick={dodgeNo}
+                            onMouseEnter={() => {
+                                if (window.matchMedia?.("(hover: hover)")?.matches) dodgeNo();
+                            }}
+                            style={{ left: `${noPos.x}%`, top: `${noPos.y}%` }}>
+                            {NO_TEXTS[noIdx]}
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {phase === "hold" && (
+                <div className={styles.levelWrap}>
+                    <h2 className={styles.levelTitle}>One last thing... ❤️</h2>
+                    <div className={styles.holdRingWrap}
+                        onMouseDown={startHold} onMouseUp={endHold} onMouseLeave={endHold}
+                        onTouchStart={startHold} onTouchEnd={endHold}>
+                        <svg className={styles.ringSvg} viewBox="0 0 210 210">
+                            <defs>
+                                <linearGradient id="vGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stopColor="#ff3366" />
+                                    <stop offset="100%" stopColor="#ffab91" />
+                                </linearGradient>
+                            </defs>
+                            <circle cx="105" cy="105" r={R} className={styles.ringBg} />
+                            <circle cx="105" cy="105" r={R} className={styles.ringFill}
+                                strokeDasharray={CIRC} strokeDashoffset={dashOffset} />
+                        </svg>
+                        <div className={styles.bigHeart} style={{ "--hb-speed": hbSpeed }}>💖</div>
+                    </div>
+                    <p className={`${styles.holdHint} ${isPressing ? styles.holdHintActive : ""}`}>
+                        {isPressing ? "Almost yours..." : "Hold to seal it with love..."}
+                    </p>
+                </div>
+            )}
+        </>
+    );
+}
+
+// ═══════════════════════════════════════════
+//  LEVEL 8 — GRAND CELEBRATION
+// ═══════════════════════════════════════════
+
+function CelebrationLevel() {
+    const [letterText, setLetterText] = useState("");
+    const [letterDone, setLetterDone] = useState(false);
+    const [showPhotos, setShowPhotos] = useState(false);
+    const [showLetter, setShowLetter] = useState(false);
+
+    useEffect(() => {
+        setTimeout(() => setShowPhotos(true), 800);
+        setTimeout(() => setShowLetter(true), 1800);
+    }, []);
+
+    useEffect(() => {
+        if (!showLetter) return;
+        let idx = 0;
+        const timer = setInterval(() => {
+            idx++;
+            setLetterText(FINAL_LETTER.slice(0, idx));
+            if (idx >= FINAL_LETTER.length) {
+                clearInterval(timer);
+                setLetterDone(true);
+            }
+        }, 28);
+        return () => clearInterval(timer);
+    }, [showLetter]);
+
     const saveLetter = () => {
-        const blb = new Blob([FINAL_LETTER_TEXT], { type: "text/plain" });
-        const url = URL.createObjectURL(blb);
+        const blob = new Blob([FINAL_LETTER], { type: "text/plain" });
+        const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
         a.download = "My_Valentine_Letter.txt";
@@ -347,191 +851,123 @@ export default function Day8() {
         URL.revokeObjectURL(url);
     };
 
-    // ── Derived ──
-    const warmClass = catches < 5 ? '' : catches < 9 ? styles.warm1 : catches < 12 ? styles.warm2 : styles.warm3;
-    const progress = (Math.min(catches, TOTAL_CATCHES) / TOTAL_CATCHES) * 100;
-    const dashOffset = C - (holdProgress / 100) * C;
-    const hbSpeed = isPressing ? `${Math.max(0.3, 1.2 - (holdProgress / 100) * 0.9)}s` : '1.2s';
+    return (
+        <div className={styles.celebWrap}>
+            <div className={styles.celebHeader}>
+                <h1 className={styles.celebTitle}>My Forever Valentine 💑</h1>
+                <p className={styles.celebSub}>I choose you. Today and always.</p>
+            </div>
+
+            {showPhotos && (
+                <div className={styles.photoGrid}>
+                    {PHOTOS.map((photo, i) => (
+                        <div key={i} className={styles.photoCard} style={{ "--delay": `${0.1 + i * 0.15}s` }}>
+                            <div className={styles.photoImg} style={{ backgroundImage: `url(${photo})` }} />
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            {showLetter && (
+                <div className={styles.letterCard}>
+                    <div className={styles.seal}>❤️</div>
+                    <div className={styles.pinPolaroid}>
+                        <div className={styles.pin}>📌</div>
+                        <div className={styles.polaroidFrame}>
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={POLAROID} alt="Us" className={styles.polaroidImg} />
+                        </div>
+                    </div>
+                    <h2 className={styles.letterTitle}>To My One & Only</h2>
+                    <div className={styles.letterBody}>
+                        {letterText}
+                        {!letterDone && <span className={styles.cursor}>|</span>}
+                    </div>
+                </div>
+            )}
+
+            {letterDone && (
+                <button className={styles.saveBtn} onClick={saveLetter}>
+                    Save Letter Forever 💌
+                </button>
+            )}
+
+            <div style={{ height: 40 }} />
+        </div>
+    );
+}
+
+// ═══════════════════════════════════════════
+//  MAIN DAY 8 COMPONENT
+// ═══════════════════════════════════════════
+
+export default function Day8() {
+    const [level, setLevel] = useState(0);
+    const [transitioning, setTransitioning] = useState(false);
+    const [petals] = useState(() =>
+        Array.from({ length: 12 }, (_, i) => ({
+            id: i,
+            emoji: ["❤️", "💖", "✨", "🌹", "🦋"][i % 5],
+            left: Math.random() * 100,
+            delay: Math.random() * 8,
+            dur: 8 + Math.random() * 6,
+        }))
+    );
+
+    useEffect(() => {
+        const link = document.createElement("link");
+        link.href = "https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&family=Pacifico&family=Quicksand:wght@400;600;700&display=swap";
+        link.rel = "stylesheet";
+        document.head.appendChild(link);
+        return () => document.head.removeChild(link);
+    }, []);
+
+    const nextLevel = useCallback(() => {
+        if (transitioning) return;
+        setTransitioning(true);
+        setTimeout(() => {
+            setLevel((prev) => prev + 1);
+            setTransitioning(false);
+        }, 700);
+    }, [transitioning]);
 
     return (
-        <div className={`${styles.container} ${warmClass}`}>
-            {/* Glow orbs */}
+        <div className={styles.container}>
             <div className={styles.orb1} />
             <div className={styles.orb2} />
             <div className={styles.orb3} />
 
-            {/* Petals */}
             <div className={styles.petalsLayer}>
-                {petals.map(p => (
+                {petals.map((p) => (
                     <span key={p.id} className={styles.petal}
-                        style={{ left: `${p.left}%`, '--del': `${p.delay}s`, '--dur': `${p.dur}s` }}>
+                        style={{ left: `${p.left}%`, "--del": `${p.delay}s`, "--dur": `${p.dur}s` }}>
                         {p.emoji}
                     </span>
                 ))}
             </div>
 
-            {/* ═══ GAME PHASE ═══ */}
-            {phase === 'game' && (
-                <>
-                    <div className={styles.hud}>
-                        <h1 className={styles.title}>Happy Valentine's Day ❤️</h1>
-                        <p className={styles.subtitle}>catch my heart to unlock your gift...</p>
-                        <div className={styles.progressBar}>
-                            <div className={styles.progressFill} style={{ width: `${progress}%` }} />
-                        </div>
-                        <span className={styles.scoreText}>{catches} / {TOTAL_CATCHES} hearts caught</span>
+            {level > 0 && level <= TOTAL_LEVELS && (
+                <div className={styles.levelIndicator}>
+                    <span className={styles.levelLabel}>Level {level} / {TOTAL_LEVELS}</span>
+                    <div className={styles.levelBar}>
+                        <div className={styles.levelBarFill} style={{ width: `${(level / TOTAL_LEVELS) * 100}%` }} />
                     </div>
-
-                    {caughtMarks.map(m => (
-                        <div key={m.id} className={styles.caughtMark}
-                            style={{ left: m.x, top: m.y, fontSize: m.size, transform: 'translate(-50%,-50%)' }}>
-                            ❤️
-                        </div>
-                    ))}
-
-                    <div className={styles.gameCanvas} ref={canvasRef}>
-                        {hearts.map(h => (
-                            <div
-                                key={h.id}
-                                className={`${styles.heartTarget} ${h.isGolden ? styles.heartGolden : ''}`}
-                                onClick={(e) => handleCatch(h, e)}
-                                style={{
-                                    left: h.x, top: h.y, width: h.size, height: h.size,
-                                    '--bounce-delay': `${h.bounceDelay}s`,
-                                }}
-                            >
-                                <div className={styles.heartInner}
-                                    style={{ '--heart-glow': h.isGolden ? 'rgba(255,215,0,0.35)' : 'rgba(255,50,100,0.25)' }}>
-                                    <span className={styles.heartEmoji}
-                                        style={{ '--heart-size': h.isGolden ? '3rem' : '2.4rem' }}>
-                                        ❤️
-                                    </span>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-
-                    {popEffects.map(p => (
-                        <div key={p.id} className={styles.popRing}
-                            style={{
-                                left: p.x - p.size / 2, top: p.y - p.size / 2,
-                                width: p.size, height: p.size,
-                                border: `2px solid ${p.color}`,
-                                boxShadow: `0 0 15px ${p.color}`,
-                            }}
-                        />
-                    ))}
-
-                    {sparkles.map(s => (
-                        <div key={s.id} className={styles.sparkle}
-                            style={{ left: s.x, top: s.y, '--sx': s.sx, '--sy': s.sy, '--sr': s.sr }}>
-                            {s.emoji}
-                        </div>
-                    ))}
-
-                    {floatMsgs.map(fm => (
-                        <div key={fm.id} className={styles.floatMessage}
-                            style={{ left: fm.x, top: fm.y }}>
-                            {fm.text}
-                        </div>
-                    ))}
-                </>
-            )}
-
-            {/* ═══ HOLD PHASE ═══ */}
-            {phase === 'hold' && (
-                <div className={styles.holdPhase}>
-                    <div className={styles.hud}>
-                        <h1 className={styles.title}>One last thing... ❤️</h1>
-                    </div>
-
-                    <div className={styles.holdRingWrap}
-                        onMouseDown={startHold} onMouseUp={endHold} onMouseLeave={endHold}
-                        onTouchStart={startHold} onTouchEnd={endHold}>
-
-                        <svg className={styles.ringSvg} viewBox="0 0 210 210">
-                            <defs>
-                                <linearGradient id="valentineGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" stopColor="#ff3366" />
-                                    <stop offset="50%" stopColor="#ff4d6d" />
-                                    <stop offset="100%" stopColor="#ffab91" />
-                                </linearGradient>
-                            </defs>
-                            <circle className={styles.ringBg} cx="105" cy="105" r={R} />
-                            <circle className={styles.ringFill} cx="105" cy="105" r={R}
-                                strokeDasharray={C} strokeDashoffset={dashOffset} />
-                        </svg>
-
-                        <div className={`${styles.bigHeart} ${styles.heartbeat} ${isPressing ? styles.bigHeartPressing : ''}`}
-                            style={{ '--hb-speed': hbSpeed }}>
-                            💖
-                        </div>
-
-                        {holdSparkles.map(s => (
-                            <div key={s.id} className={styles.holdSparkle}
-                                style={{ '--sp-x': s.x, '--sp-y': s.y, '--sp-r': s.r, '--sp-dur': s.dur, fontSize: '1.2rem' }}>
-                                {s.emoji}
-                            </div>
-                        ))}
-                    </div>
-
-                    <p className={`${styles.holdHint} ${isPressing ? styles.holdHintActive : ''}`}>
-                        {isPressing ? "Almost yours..." : 'Hold to accept my love...'}
-                    </p>
                 </div>
             )}
 
-            {/* ═══ EXPLOSION ═══ */}
-            {showFlash && <div className={styles.flash} />}
-            {explosion.length > 0 && (
-                <div className={styles.explosionLayer}>
-                    {explosion.map(ep => (
-                        <div key={ep.id} className={styles.explosionPart}
-                            style={{ '--ex': ep.ex, '--ey': ep.ey, '--er': ep.er, fontSize: ep.fs }}>
-                            {ep.emoji}
-                        </div>
-                    ))}
-                </div>
-            )}
+            {transitioning && <div className={styles.transitionOverlay} />}
 
-            {/* ═══ CELEBRATION ═══ */}
-            {phase === 'celebration' && (
-                <div className={styles.celebWrap}>
-                    <div className={styles.celebHeader}>
-                        <h1 className={styles.celebTitle}>My Forever Valentine 💑</h1>
-                        <p className={styles.celebSub}>I choose you. Today and always.</p>
-                    </div>
-
-                    <div className={styles.photoGrid}>
-                        {PHOTOS.map((photo, i) => (
-                            <div key={i} className={styles.photoCard}
-                                style={{ '--delay': `${0.1 + i * 0.1}s` }}>
-                                <div className={styles.photoImg}
-                                    style={{ backgroundImage: `url(${photo})` }} />
-                            </div>
-                        ))}
-                    </div>
-
-                    <div className={styles.letterCard}>
-                        <div className={styles.seal}>❤️</div>
-                        <div className={styles.pinPolaroid}>
-                            <div className={styles.pin}>📌</div>
-                            <div className={styles.polaroidFrame}>
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img src={POLAROID} alt="Us" className={styles.polaroidImg} />
-                            </div>
-                        </div>
-                        <h2 className={styles.letterTitle}>To My One & Only</h2>
-                        <div className={styles.letterBody}>{FINAL_LETTER_TEXT}</div>
-                    </div>
-
-                    <button className={styles.saveBtn} onClick={saveLetter}>
-                        Save Letter Forever 💌
-                    </button>
-
-                    <div style={{ height: '40px' }} />
-                </div>
-            )}
+            <div className={styles.levelContainer} key={level}>
+                {level === 0 && <IntroLevel onStart={nextLevel} />}
+                {level === 1 && <ConstellationLevel onComplete={nextLevel} />}
+                {level === 2 && <WordScrambleLevel onComplete={nextLevel} />}
+                {level === 3 && <MemoryMatchLevel onComplete={nextLevel} />}
+                {level === 4 && <QuizLevel onComplete={nextLevel} />}
+                {level === 5 && <ScratchCardLevel onComplete={nextLevel} />}
+                {level === 6 && <HeartCatchLevel onComplete={nextLevel} />}
+                {level === 7 && <RunawayLevel onComplete={nextLevel} />}
+                {level === 8 && <CelebrationLevel />}
+            </div>
         </div>
     );
 }
