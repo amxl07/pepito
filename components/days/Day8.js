@@ -927,7 +927,7 @@ function FairyGateLevel({ onComplete }) {
 
 const SEARCH_STEPS = [
     { dialogue: "Did you get my chocolates? 🍫", button: "Yes! 😍", buttonDelay: 1500 },
-    { dialogue: "Good... but it isn't just a box. One box has a key to your favorite Fairy World...", button: "Which is it? 🤔", buttonDelay: 2500 },
+    { dialogue: "Good.. One box has a key to your favorite Fairy World...", button: "Which is it? 🤔", buttonDelay: 2500 },
     { dialogue: "I hold something sweet, named after a gem so red... 💎", button: "Ruby! I found it! ❤️", buttonDelay: 2000 },
     { dialogue: "Now open Ruby carefully... lift the first layer...", button: "I lifted it!", buttonDelay: 3000 },
     { dialogue: "Look underneath... what do you see? 👀", button: "I see something! ✨", buttonDelay: 2000 },
@@ -1292,6 +1292,7 @@ function FairyQuestLevel() {
         setTimeout(() => setShowFlash(false), 1200);
         setTimeout(() => {
             setExplosion([]);
+            setSubPhase("finale");
             setFinaleActive(true);
         }, 1800);
     };
