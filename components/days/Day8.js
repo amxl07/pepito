@@ -898,9 +898,10 @@ function CelebrationLevel({ onComplete }) {
 //  LEVEL 9 — FINAL SURPRISE COUNTDOWN
 // ═══════════════════════════════════════════
 
-function SurpriseLevel() {
+function SurpriseLevel({ onComplete }) {
     const [showCountdown, setShowCountdown] = useState(false);
     const [timeLeft, setTimeLeft] = useState("");
+    const completedRef = useRef(false);
 
     useEffect(() => {
         const timer = setTimeout(() => setShowCountdown(true), 3500);
@@ -913,11 +914,14 @@ function SurpriseLevel() {
         const target = new Date();
         target.setHours(23, 11, 0, 0); // 11:11 PM
 
-        // If it's already past 11:11 PM, verify if we should show for tomorrow or just show 00:00:00
-        // For now, let's assume it's for today. If active user is past 11:11, maybe target tomorrow?
-        // User request: "countdown to 11:11 PM"
+        // If already past 11:11 PM, countdown is done — go straight to next level
         if (new Date() > target) {
-            target.setDate(target.getDate() + 1);
+            setTimeLeft("00:00:00");
+            if (onComplete && !completedRef.current) {
+                completedRef.current = true;
+                setTimeout(onComplete, 2000);
+            }
+            return;
         }
 
         const interval = setInterval(() => {
@@ -927,6 +931,10 @@ function SurpriseLevel() {
             if (diff <= 0) {
                 setTimeLeft("00:00:00");
                 clearInterval(interval);
+                if (onComplete && !completedRef.current) {
+                    completedRef.current = true;
+                    setTimeout(onComplete, 2000);
+                }
                 return;
             }
 
@@ -949,6 +957,430 @@ function SurpriseLevel() {
                     <h1 className={styles.surpriseText}>Open this at 11:11 PM ✨</h1>
                     <div className={styles.countdown}>{timeLeft}</div>
                 </>
+            )}
+        </div>
+    );
+}
+
+// ═══════════════════════════════════════════
+//  LEVEL 10 — FAIRY QUEST (WINX CLUB PUZZLE)
+// ═══════════════════════════════════════════
+
+const FAIRY_RIDDLES = [
+    "I hold something sweet, named after a gem so red...",
+    "Lift the first layer, look underneath...",
+    "Among many stars, only some carry the spell...",
+];
+
+const TECNA_LETTERS = ["T", "E", "C", "N", "A"];
+
+const STELLA_MESSAGE = `You found Tecna's spell! But here's the real magic...
+
+Just like Stella is the brightest fairy in the Winx Club,
+You are the brightest light in my universe.
+
+My Stella. My star. My sun. My shining sun.`;
+
+function FairyQuestLevel() {
+    const [phase, setPhase] = useState(1);
+    const [riddleIdx, setRiddleIdx] = useState(0);
+    const [foundLetters, setFoundLetters] = useState([]);
+    const [activeStars, setActiveStars] = useState([]);
+    const [inputLetter, setInputLetter] = useState("");
+    const [showInput, setShowInput] = useState(false);
+    const [tappedStarIdx, setTappedStarIdx] = useState(null);
+    const [anagramTiles, setAnagramTiles] = useState([]);
+    const [anagramSelected, setAnagramSelected] = useState([]);
+    const [anagramShake, setAnagramShake] = useState(false);
+    const [wrongAttempts, setWrongAttempts] = useState(0);
+    const [anagramSolved, setAnagramSolved] = useState(false);
+    const [stellaText, setStellaText] = useState("");
+    const [stellaDone, setStellaDone] = useState(false);
+    const [visible, setVisible] = useState(false);
+    const [sparkles, setSparkles] = useState([]);
+    const [matrixActive, setMatrixActive] = useState(false);
+    const [finalSparkle, setFinalSparkle] = useState(false);
+
+    // Stars for Phase 2
+    const [stars] = useState(() =>
+        Array.from({ length: 35 }, (_, i) => ({
+            id: i,
+            x: 8 + Math.random() * 84,
+            y: 8 + Math.random() * 60,
+            size: 0.6 + Math.random() * 0.8,
+            delay: Math.random() * 4,
+            dur: 2 + Math.random() * 3,
+        }))
+    );
+
+    useEffect(() => {
+        setTimeout(() => setVisible(true), 300);
+    }, []);
+
+    // Phase 4 typewriter effect
+    useEffect(() => {
+        if (phase !== 4) return;
+        let idx = 0;
+        const timer = setInterval(() => {
+            idx++;
+            setStellaText(STELLA_MESSAGE.slice(0, idx));
+            if (idx >= STELLA_MESSAGE.length) {
+                clearInterval(timer);
+                setStellaDone(true);
+            }
+        }, 35);
+        return () => clearInterval(timer);
+    }, [phase]);
+
+    // Phase 1: Advance riddle
+    const foundIt = () => {
+        if (window.navigator?.vibrate) window.navigator.vibrate(25);
+        // Sparkle burst
+        const newSparkles = Array.from({ length: 12 }, (_, i) => ({
+            id: Date.now() + i,
+            x: 40 + Math.random() * 20,
+            y: 40 + Math.random() * 20,
+        }));
+        setSparkles(newSparkles);
+        setTimeout(() => setSparkles([]), 1000);
+
+        if (riddleIdx + 1 < FAIRY_RIDDLES.length) {
+            setRiddleIdx((prev) => prev + 1);
+        } else {
+            setTimeout(() => setPhase(2), 800);
+        }
+    };
+
+    // Phase 2: Tap star
+    const tapStar = (starIdx) => {
+        if (activeStars.includes(starIdx) || foundLetters.length >= 5 || showInput) return;
+        if (window.navigator?.vibrate) window.navigator.vibrate(15);
+        setTappedStarIdx(starIdx);
+        setShowInput(true);
+        setInputLetter("");
+    };
+
+    // Phase 2: Submit letter
+    const submitLetter = () => {
+        const letter = inputLetter.toUpperCase().trim();
+        if (!letter) return;
+
+        if (TECNA_LETTERS.includes(letter) && !foundLetters.includes(letter)) {
+            if (window.navigator?.vibrate) window.navigator.vibrate([20, 15, 30]);
+            const newFound = [...foundLetters, letter];
+            setFoundLetters(newFound);
+            setActiveStars([...activeStars, tappedStarIdx]);
+            setShowInput(false);
+            setTappedStarIdx(null);
+
+            if (newFound.length >= 5) {
+                setTimeout(() => {
+                    // Shuffle letters for anagram
+                    const shuffled = [...newFound];
+                    for (let i = shuffled.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+                    }
+                    // Avoid correct order by chance
+                    if (shuffled.join("") === "TECNA") {
+                        [shuffled[0], shuffled[1]] = [shuffled[1], shuffled[0]];
+                    }
+                    setAnagramTiles(shuffled);
+                    setPhase(3);
+                }, 1500);
+            }
+        } else {
+            if (window.navigator?.vibrate) window.navigator.vibrate([40, 20, 40]);
+            setShowInput(false);
+            setTappedStarIdx(null);
+        }
+    };
+
+    // Phase 3: Tap anagram tile
+    const tapAnagramTile = (idx) => {
+        if (anagramSelected.includes(idx) || anagramSolved) return;
+        if (window.navigator?.vibrate) window.navigator.vibrate(15);
+
+        const newSelected = [...anagramSelected, idx];
+        setAnagramSelected(newSelected);
+
+        if (newSelected.length === 5) {
+            const built = newSelected.map((i) => anagramTiles[i]).join("");
+            if (built === "TECNA") {
+                setAnagramSolved(true);
+                if (window.navigator?.vibrate) window.navigator.vibrate([50, 30, 100]);
+                // Matrix rain + transition to Phase 4
+                setMatrixActive(true);
+                setTimeout(() => {
+                    setMatrixActive(false);
+                    setPhase(4);
+                }, 2000);
+            } else {
+                setAnagramShake(true);
+                setWrongAttempts((prev) => prev + 1);
+                if (window.navigator?.vibrate) window.navigator.vibrate([40, 20, 40]);
+                setTimeout(() => {
+                    setAnagramSelected([]);
+                    setAnagramShake(false);
+                }, 600);
+            }
+        }
+    };
+
+    // Phase 4: Final sparkle button
+    const triggerFinalSparkle = () => {
+        if (window.navigator?.vibrate) window.navigator.vibrate([50, 30, 50, 30, 100]);
+        setFinalSparkle(true);
+    };
+
+    return (
+        <div className={`${phase === 4 ? styles.fairyWrapStella : styles.fairyWrap} ${visible ? styles.fairyVisible : ""}`}>
+            {/* Fairy dust particles for phases 1-3 */}
+            {phase < 4 && (
+                <div className={styles.fairyDustLayer}>
+                    {Array.from({ length: 20 }, (_, i) => (
+                        <span key={i} className={styles.fairyDustParticle}
+                            style={{
+                                left: `${Math.random() * 100}%`,
+                                "--fd-delay": `${Math.random() * 6}s`,
+                                "--fd-dur": `${5 + Math.random() * 5}s`,
+                                "--fd-size": `${3 + Math.random() * 5}px`,
+                            }} />
+                    ))}
+                </div>
+            )}
+
+            {/* Sparkle burst overlay */}
+            {sparkles.length > 0 && (
+                <div className={styles.sparkleBurst}>
+                    {sparkles.map((sp) => (
+                        <span key={sp.id} className={styles.sparkleParticle}
+                            style={{ left: `${sp.x}%`, top: `${sp.y}%` }}>
+                            ✨
+                        </span>
+                    ))}
+                </div>
+            )}
+
+            {/* Matrix rain overlay */}
+            {matrixActive && (
+                <div className={styles.matrixOverlay}>
+                    {Array.from({ length: 20 }, (_, i) => (
+                        <div key={i} className={styles.matrixColumn}
+                            style={{ left: `${i * 5 + Math.random() * 3}%`, "--mc-delay": `${Math.random() * 1}s`, "--mc-dur": `${0.8 + Math.random() * 1.2}s` }}>
+                            {Array.from({ length: 12 }, (_, j) => (
+                                <span key={j} className={styles.matrixChar}>
+                                    {String.fromCharCode(48 + Math.floor(Math.random() * 10))}
+                                </span>
+                            ))}
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            {/* ═══════ PHASE 1: Riddles ═══════ */}
+            {phase === 1 && (
+                <div className={styles.fairyPhase}>
+                    <div className={styles.butterflyWings}>🦋</div>
+                    <h2 className={styles.fairyTitle}>A fairy has hidden a secret in your world...</h2>
+                    <div className={styles.riddleCard}>
+                        <p className={styles.riddleText}>
+                            {FAIRY_RIDDLES[riddleIdx]}
+                        </p>
+                        <div className={styles.riddleDots}>
+                            {FAIRY_RIDDLES.map((_, i) => (
+                                <div key={i} className={`${styles.riddleDot} ${i <= riddleIdx ? styles.riddleDotActive : ""}`} />
+                            ))}
+                        </div>
+                    </div>
+                    <button className={styles.fairyBtn} onClick={foundIt}>
+                        I found it! ✨
+                    </button>
+                </div>
+            )}
+
+            {/* ═══════ PHASE 2: Star Field ═══════ */}
+            {phase === 2 && (
+                <div className={styles.fairyPhase}>
+                    <h2 className={styles.fairyTitleSm}>Search the stars in your hands...</h2>
+                    <p className={styles.fairySub}>find the letters of the fairy&apos;s name</p>
+
+                    <div className={styles.starField}>
+                        {stars.map((star) => {
+                            const isActive = activeStars.includes(star.id);
+                            return (
+                                <div key={star.id}
+                                    className={`${styles.fieldStar} ${isActive ? styles.fieldStarActive : ""} ${tappedStarIdx === star.id ? styles.fieldStarTapped : ""}`}
+                                    onClick={() => tapStar(star.id)}
+                                    style={{
+                                        left: `${star.x}%`,
+                                        top: `${star.y}%`,
+                                        "--st-delay": `${star.delay}s`,
+                                        "--st-dur": `${star.dur}s`,
+                                    }}>
+                                    <span style={{ fontSize: `${star.size}rem` }}>
+                                        {isActive ? "💜" : "⭐"}
+                                    </span>
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                    {/* Letter input popup */}
+                    {showInput && (
+                        <div className={styles.letterInputOverlay}>
+                            <div className={styles.letterInputCard}>
+                                <p className={styles.letterInputLabel}>What letter did you find?</p>
+                                <input
+                                    type="text"
+                                    maxLength={1}
+                                    value={inputLetter}
+                                    onChange={(e) => setInputLetter(e.target.value)}
+                                    className={styles.letterInput}
+                                    autoFocus
+                                    onKeyDown={(e) => e.key === "Enter" && submitLetter()}
+                                />
+                                <div className={styles.letterInputBtns}>
+                                    <button className={styles.letterInputSubmit} onClick={submitLetter}>
+                                        Cast ✨
+                                    </button>
+                                    <button className={styles.letterInputCancel} onClick={() => { setShowInput(false); setTappedStarIdx(null); }}>
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Spell bar (letter slots) */}
+                    <div className={styles.spellBar}>
+                        {TECNA_LETTERS.map((_, i) => (
+                            <div key={i} className={`${styles.spellSlot} ${foundLetters[i] ? styles.spellSlotFilled : ""}`}>
+                                {foundLetters[i] || ""}
+                                {foundLetters[i] && <span className={styles.spellPulseRing} />}
+                            </div>
+                        ))}
+                    </div>
+                    <p className={styles.fairyCounter}>{foundLetters.length} / 5 letters found</p>
+                </div>
+            )}
+
+            {/* ═══════ PHASE 3: Anagram Puzzle ═══════ */}
+            {phase === 3 && (
+                <div className={styles.fairyPhase}>
+                    <h2 className={styles.fairyTitleSm}>Unscramble the letters to reveal a Winx fairy&apos;s name!</h2>
+
+                    {/* Answer slots */}
+                    <div className={styles.anagramAnswer}>
+                        {Array.from({ length: 5 }, (_, i) => (
+                            <div key={i} className={`${styles.anagramSlot} ${anagramSelected[i] !== undefined ? styles.anagramSlotFilled : ""}`}>
+                                {anagramSelected[i] !== undefined ? anagramTiles[anagramSelected[i]] : ""}
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Tile row */}
+                    <div className={`${styles.anagramTiles} ${anagramShake ? styles.shake : ""}`}>
+                        {anagramTiles.map((letter, i) => (
+                            <button key={i}
+                                className={`${styles.anagramTile} ${anagramSelected.includes(i) ? styles.anagramTileUsed : ""}`}
+                                onClick={() => tapAnagramTile(i)}
+                                disabled={anagramSelected.includes(i)}>
+                                {letter}
+                            </button>
+                        ))}
+                    </div>
+
+                    {anagramSelected.length > 0 && !anagramSolved && (
+                        <button className={styles.clearBtn} onClick={() => setAnagramSelected([])}>Clear</button>
+                    )}
+
+                    {wrongAttempts >= 3 && !anagramSolved && (
+                        <p className={styles.fairyHint}>This fairy is the brains of the Winx Club... 💜</p>
+                    )}
+
+                    {anagramSolved && <p className={styles.fairySolved}>TECNA! ✨💜</p>}
+                </div>
+            )}
+
+            {/* ═══════ PHASE 4: Stella Celebration ═══════ */}
+            {phase === 4 && (
+                <div className={styles.stellaPhase}>
+                    {/* Sun burst background */}
+                    <div className={styles.sunBurst}>
+                        {Array.from({ length: 12 }, (_, i) => (
+                            <div key={i} className={styles.sunRay} style={{ "--ray-angle": `${i * 30}deg` }} />
+                        ))}
+                    </div>
+
+                    {/* Floating golden stars */}
+                    <div className={styles.goldenStarsLayer}>
+                        {Array.from({ length: 15 }, (_, i) => (
+                            <span key={i} className={styles.goldenStar}
+                                style={{
+                                    left: `${Math.random() * 100}%`,
+                                    "--gs-delay": `${Math.random() * 5}s`,
+                                    "--gs-dur": `${6 + Math.random() * 4}s`,
+                                }}>
+                                ⭐
+                            </span>
+                        ))}
+                    </div>
+
+                    {/* Ring of Solaria SVG */}
+                    <div className={styles.solariaContainer}>
+                        <svg className={styles.solariaSvg} viewBox="0 0 120 120">
+                            <defs>
+                                <linearGradient id="solariaGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stopColor="#ffd700" />
+                                    <stop offset="50%" stopColor="#ff8c00" />
+                                    <stop offset="100%" stopColor="#ffd700" />
+                                </linearGradient>
+                            </defs>
+                            <circle cx="60" cy="60" r="45" fill="none" stroke="url(#solariaGrad)" strokeWidth="3"
+                                className={styles.solariaRing} />
+                            <circle cx="60" cy="60" r="38" fill="none" stroke="url(#solariaGrad)" strokeWidth="1.5"
+                                opacity="0.5" className={styles.solariaRingInner} />
+                            {/* Sun symbol in center */}
+                            <text x="60" y="65" textAnchor="middle" fontSize="28" className={styles.solariaSun}>
+                                ☀️
+                            </text>
+                        </svg>
+                    </div>
+
+                    <p className={styles.stellaQuote}>Winx is your magical identity...</p>
+
+                    <div className={styles.stellaMessageCard}>
+                        <div className={styles.stellaMessageBody}>
+                            {stellaText}
+                            {!stellaDone && <span className={styles.cursor}>|</span>}
+                        </div>
+                    </div>
+
+                    {stellaDone && !finalSparkle && (
+                        <button className={styles.shineBtn} onClick={triggerFinalSparkle}>
+                            Shine Forever ✨
+                        </button>
+                    )}
+
+                    {finalSparkle && (
+                        <div className={styles.finalSparkleOverlay}>
+                            {Array.from({ length: 30 }, (_, i) => {
+                                const a = (i / 30) * Math.PI * 2;
+                                const d = 100 + Math.random() * 200;
+                                return (
+                                    <span key={i} className={styles.finalSparkleParticle}
+                                        style={{
+                                            "--fsp-x": `${Math.cos(a) * d}px`,
+                                            "--fsp-y": `${Math.sin(a) * d}px`,
+                                        }}>
+                                        {["✨", "⭐", "💛", "☀️", "🌟"][i % 5]}
+                                    </span>
+                                );
+                            })}
+                        </div>
+                    )}
+                </div>
             )}
         </div>
     );
@@ -1024,7 +1456,8 @@ export default function Day8() {
                 {level === 6 && <HeartCatchLevel onComplete={nextLevel} />}
                 {level === 7 && <RunawayLevel onComplete={nextLevel} />}
                 {level === 8 && <CelebrationLevel onComplete={nextLevel} />}
-                {level === 9 && <SurpriseLevel />}
+                {level === 9 && <SurpriseLevel onComplete={nextLevel} />}
+                {level === 10 && <FairyQuestLevel />}
             </div>
         </div>
     );

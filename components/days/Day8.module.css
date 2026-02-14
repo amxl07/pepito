@@ -19,7 +19,10 @@
 }
 
 /* Ambient glow orbs */
-.glowOrb {
+/* Ambient glow orbs */
+.orb1,
+.orb2,
+.orb3 {
     position: absolute;
     border-radius: 50%;
     filter: blur(90px);
@@ -28,7 +31,6 @@
 }
 
 .orb1 {
-    composes: glowOrb;
     top: -10%;
     left: -5%;
     width: 50vw;
@@ -39,7 +41,6 @@
 }
 
 .orb2 {
-    composes: glowOrb;
     bottom: -15%;
     right: -10%;
     width: 55vw;
@@ -50,7 +51,6 @@
 }
 
 .orb3 {
-    composes: glowOrb;
     top: 35%;
     left: 45%;
     width: 30vw;
@@ -1569,4 +1569,852 @@
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     letter-spacing: 2px;
     margin-top: 10px;
+}
+
+/* ============================================
+   LEVEL 10 — FAIRY QUEST (WINX CLUB)
+   ============================================ */
+
+/* ---- Base Wraps ---- */
+.fairyWrap {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(160deg, #2c003e 0%, #1a0030 40%, #0d001a 100%);
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(15px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.fairyWrapStella {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(160deg, #3d1f00 0%, #2a1500 40%, #1a0d00 100%);
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(15px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.fairyVisible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.fairyPhase {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    gap: 16px;
+    width: 100%;
+    max-width: 420px;
+    z-index: 5;
+    animation: fadeIn 0.6s ease both;
+}
+
+/* ---- Fairy Dust Particles ---- */
+.fairyDustLayer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    overflow: hidden;
+}
+
+.fairyDustParticle {
+    position: absolute;
+    top: -10px;
+    width: var(--fd-size, 4px);
+    height: var(--fd-size, 4px);
+    border-radius: 50%;
+    background: radial-gradient(circle, #39ff14 0%, #9b59b6 60%, transparent 100%);
+    opacity: 0;
+    animation: fairyDust var(--fd-dur, 7s) linear infinite;
+    animation-delay: var(--fd-delay, 0s);
+    box-shadow: 0 0 6px #39ff14, 0 0 12px #9b59b6;
+}
+
+@keyframes fairyDust {
+    0% {
+        transform: translateY(0) translateX(0) scale(0);
+        opacity: 0;
+    }
+    10% {
+        opacity: 0.8;
+        transform: translateY(8vh) translateX(10px) scale(1);
+    }
+    50% {
+        opacity: 0.5;
+        transform: translateY(50vh) translateX(-15px) scale(0.7);
+    }
+    90% {
+        opacity: 0.2;
+    }
+    100% {
+        transform: translateY(105vh) translateX(20px) scale(0.3);
+        opacity: 0;
+    }
+}
+
+/* ---- Phase 1: Riddles ---- */
+.butterflyWings {
+    font-size: 3rem;
+    animation: butterflyFade 3s ease-in-out infinite;
+    filter: drop-shadow(0 0 15px rgba(155, 89, 182, 0.6));
+}
+
+@keyframes butterflyFade {
+    0%, 100% { opacity: 0.4; transform: scale(1) rotate(-5deg); }
+    50% { opacity: 1; transform: scale(1.15) rotate(5deg); }
+}
+
+.fairyTitle {
+    font-family: 'Pacifico', cursive;
+    font-size: 1.5rem;
+    background: linear-gradient(45deg, #9b59b6, #c39bd3, #39ff14);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 0;
+    text-align: center;
+    filter: drop-shadow(0 2px 8px rgba(155, 89, 182, 0.4));
+}
+
+.fairyTitleSm {
+    font-family: 'Pacifico', cursive;
+    font-size: 1.2rem;
+    background: linear-gradient(45deg, #9b59b6, #c39bd3, #39ff14);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 0;
+    text-align: center;
+    filter: drop-shadow(0 2px 6px rgba(155, 89, 182, 0.3));
+}
+
+.fairySub {
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.85rem;
+    color: rgba(200, 180, 255, 0.5);
+    font-weight: 600;
+    font-style: italic;
+    text-align: center;
+    margin: 0;
+}
+
+.riddleCard {
+    background: rgba(155, 89, 182, 0.1);
+    border: 1px solid rgba(155, 89, 182, 0.25);
+    border-radius: 20px;
+    padding: 24px 20px;
+    width: min(360px, 88vw);
+    text-align: center;
+    animation: fadeSlideUp 0.5s ease both;
+}
+
+.riddleText {
+    font-family: 'Nunito', sans-serif;
+    font-size: 1.05rem;
+    color: rgba(200, 180, 255, 0.85);
+    font-weight: 600;
+    font-style: italic;
+    line-height: 1.6;
+    margin: 0 0 16px 0;
+}
+
+.riddleDots {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.riddleDot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(155, 89, 182, 0.2);
+    transition: all 0.3s ease;
+}
+
+.riddleDotActive {
+    background: #9b59b6;
+    box-shadow: 0 0 8px rgba(155, 89, 182, 0.6);
+}
+
+.fairyBtn {
+    background: linear-gradient(135deg, #9b59b6, #8e44ad);
+    color: white;
+    border: none;
+    padding: 14px 32px;
+    border-radius: 30px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 5px 25px rgba(155, 89, 182, 0.35);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.fairyBtn:active {
+    transform: scale(0.95);
+}
+
+.fairyBtn:hover {
+    box-shadow: 0 8px 30px rgba(155, 89, 182, 0.5);
+    transform: translateY(-2px);
+}
+
+/* ---- Sparkle Burst ---- */
+.sparkleBurst {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 20;
+}
+
+.sparkleParticle {
+    position: absolute;
+    font-size: 1.2rem;
+    animation: sparklePop 0.8s ease-out forwards;
+}
+
+@keyframes sparklePop {
+    0% {
+        opacity: 1;
+        transform: scale(0.5);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.5) translateY(-30px);
+    }
+}
+
+/* ---- Phase 2: Star Field ---- */
+.starField {
+    position: relative;
+    width: min(360px, 88vw);
+    height: 280px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 20px;
+    border: 1px solid rgba(155, 89, 182, 0.15);
+    overflow: hidden;
+}
+
+.fieldStar {
+    position: absolute;
+    cursor: pointer;
+    animation: starTwinkle var(--st-dur, 3s) ease-in-out infinite;
+    animation-delay: var(--st-delay, 0s);
+    transition: transform 0.3s ease, filter 0.3s ease;
+    -webkit-tap-highlight-color: transparent;
+    z-index: 2;
+}
+
+.fieldStar:active {
+    transform: scale(1.3);
+}
+
+.fieldStarActive {
+    filter: drop-shadow(0 0 10px #9b59b6) drop-shadow(0 0 20px #39ff14);
+    animation: none;
+}
+
+.fieldStarTapped {
+    animation: starTapped 0.4s ease both;
+}
+
+@keyframes starTwinkle {
+    0%, 100% {
+        opacity: 0.4;
+        transform: scale(0.9);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+}
+
+@keyframes starTapped {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.4); }
+    100% { transform: scale(1.1); }
+}
+
+/* ---- Letter Input Popup ---- */
+.letterInputOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+    animation: fadeIn 0.2s ease both;
+}
+
+.letterInputCard {
+    background: rgba(44, 0, 62, 0.95);
+    border: 1px solid rgba(155, 89, 182, 0.4);
+    border-radius: 20px;
+    padding: 24px;
+    text-align: center;
+    width: min(300px, 85vw);
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5);
+}
+
+.letterInputLabel {
+    font-family: 'Nunito', sans-serif;
+    font-size: 1rem;
+    color: rgba(200, 180, 255, 0.8);
+    font-weight: 600;
+    margin: 0 0 16px 0;
+}
+
+.letterInput {
+    width: 60px;
+    height: 60px;
+    text-align: center;
+    font-family: 'Nunito', sans-serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #39ff14;
+    background: rgba(155, 89, 182, 0.15);
+    border: 2px solid rgba(155, 89, 182, 0.4);
+    border-radius: 14px;
+    outline: none;
+    text-transform: uppercase;
+    caret-color: #9b59b6;
+}
+
+.letterInput:focus {
+    border-color: #9b59b6;
+    box-shadow: 0 0 15px rgba(155, 89, 182, 0.4);
+}
+
+.letterInputBtns {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 16px;
+}
+
+.letterInputSubmit {
+    background: linear-gradient(135deg, #9b59b6, #8e44ad);
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 20px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.letterInputSubmit:active {
+    transform: scale(0.95);
+}
+
+.letterInputCancel {
+    background: transparent;
+    border: 1px solid rgba(200, 180, 255, 0.25);
+    color: rgba(200, 180, 255, 0.5);
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* ---- Spell Bar ---- */
+.spellBar {
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.spellSlot {
+    width: 48px;
+    height: 54px;
+    border: 2px solid rgba(155, 89, 182, 0.3);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #39ff14;
+    background: rgba(155, 89, 182, 0.08);
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.spellSlotFilled {
+    border-color: rgba(155, 89, 182, 0.5);
+    background: rgba(155, 89, 182, 0.15);
+    box-shadow: 0 0 12px rgba(155, 89, 182, 0.3);
+    animation: slotPop 0.3s ease;
+}
+
+.spellPulseRing {
+    position: absolute;
+    inset: -4px;
+    border-radius: 14px;
+    border: 2px solid rgba(57, 255, 20, 0.3);
+    animation: spellPulse 1.5s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes spellPulse {
+    0%, 100% {
+        opacity: 0.3;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.8;
+        transform: scale(1.08);
+        border-color: rgba(155, 89, 182, 0.6);
+    }
+}
+
+.fairyCounter {
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.8rem;
+    color: rgba(200, 180, 255, 0.4);
+    font-weight: 600;
+    margin: 0;
+}
+
+/* ---- Phase 3: Anagram ---- */
+.anagramAnswer {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.anagramSlot {
+    width: 48px;
+    height: 54px;
+    border: 2px solid rgba(155, 89, 182, 0.25);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #39ff14;
+    background: rgba(155, 89, 182, 0.06);
+    transition: all 0.2s ease;
+}
+
+.anagramSlotFilled {
+    border-color: rgba(155, 89, 182, 0.45);
+    background: rgba(155, 89, 182, 0.12);
+    animation: slotPop 0.2s ease;
+}
+
+.anagramTiles {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.anagramTile {
+    width: 52px;
+    height: 56px;
+    border: 2px solid rgba(155, 89, 182, 0.35);
+    border-radius: 14px;
+    background: rgba(155, 89, 182, 0.15);
+    color: white;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.anagramTile:active {
+    transform: scale(0.9);
+}
+
+.anagramTileUsed {
+    opacity: 0.2;
+    transform: scale(0.85);
+    pointer-events: none;
+}
+
+.fairyHint {
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.9rem;
+    color: rgba(200, 180, 255, 0.6);
+    font-weight: 600;
+    font-style: italic;
+    text-align: center;
+    margin: 8px 0 0 0;
+    animation: fadeIn 0.5s ease both;
+}
+
+.fairySolved {
+    font-family: 'Pacifico', cursive;
+    font-size: 1.5rem;
+    background: linear-gradient(45deg, #9b59b6, #39ff14);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 12px rgba(155, 89, 182, 0.5));
+    animation: scaleUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+    margin: 0;
+}
+
+/* ---- Matrix Rain ---- */
+.matrixOverlay {
+    position: absolute;
+    inset: 0;
+    z-index: 30;
+    pointer-events: none;
+    overflow: hidden;
+    animation: fadeIn 0.3s ease both;
+}
+
+.matrixColumn {
+    position: absolute;
+    top: -20%;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    animation: matrixFall var(--mc-dur, 1s) linear forwards;
+    animation-delay: var(--mc-delay, 0s);
+}
+
+.matrixChar {
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+    color: #39ff14;
+    text-shadow: 0 0 8px #39ff14;
+    opacity: 0.7;
+}
+
+@keyframes matrixFall {
+    0% {
+        transform: translateY(0);
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    80% {
+        opacity: 0.6;
+    }
+    100% {
+        transform: translateY(130vh);
+        opacity: 0;
+    }
+}
+
+/* ---- Phase 4: Stella Celebration ---- */
+.stellaPhase {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    gap: 16px;
+    width: 100%;
+    z-index: 5;
+    animation: fadeIn 1s ease 0.3s both;
+    position: relative;
+    min-height: 100vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Sun Burst */
+.sunBurst {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 400px;
+    height: 400px;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 0;
+    animation: sunBurstGrow 1.5s ease both;
+}
+
+@keyframes sunBurstGrow {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.3);
+    }
+    100% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+.sunRay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 3px;
+    height: 180px;
+    background: linear-gradient(to top, rgba(255, 215, 0, 0.4), transparent);
+    transform-origin: bottom center;
+    transform: translate(-50%, -100%) rotate(var(--ray-angle, 0deg));
+    animation: rayPulse 3s ease-in-out infinite;
+}
+
+@keyframes rayPulse {
+    0%, 100% { opacity: 0.3; height: 160px; }
+    50% { opacity: 0.6; height: 200px; }
+}
+
+/* Golden Stars */
+.goldenStarsLayer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    overflow: hidden;
+}
+
+.goldenStar {
+    position: absolute;
+    top: -20px;
+    font-size: 1rem;
+    opacity: 0;
+    animation: goldenDrift var(--gs-dur, 8s) linear infinite;
+    animation-delay: var(--gs-delay, 0s);
+}
+
+@keyframes goldenDrift {
+    0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 0;
+    }
+    8% { opacity: 0.6; }
+    92% { opacity: 0.4; }
+    100% {
+        transform: translateY(105vh) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+/* Ring of Solaria */
+.solariaContainer {
+    width: 120px;
+    height: 120px;
+    z-index: 5;
+    animation: scaleUp 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.5s both;
+}
+
+.solariaSvg {
+    width: 100%;
+    height: 100%;
+    filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.5));
+}
+
+.solariaRing {
+    animation: solariaRotate 8s linear infinite;
+    transform-origin: 60px 60px;
+}
+
+.solariaRingInner {
+    animation: solariaRotate 12s linear infinite reverse;
+    transform-origin: 60px 60px;
+}
+
+@keyframes solariaRotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.solariaSun {
+    animation: sunGlow 2s ease-in-out infinite;
+}
+
+@keyframes sunGlow {
+    0%, 100% { opacity: 0.8; }
+    50% { opacity: 1; }
+}
+
+.stellaQuote {
+    font-family: 'Pacifico', cursive;
+    font-size: 1.1rem;
+    color: rgba(255, 215, 0, 0.7);
+    font-style: italic;
+    text-align: center;
+    margin: 0;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+    z-index: 5;
+    animation: fadeIn 1s ease 0.8s both;
+}
+
+.stellaMessageCard {
+    background: rgba(255, 215, 0, 0.08);
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    border-radius: 20px;
+    padding: 24px 20px;
+    width: min(380px, 88vw);
+    z-index: 5;
+    animation: fadeSlideUp 0.8s ease 1s both;
+}
+
+.stellaMessageBody {
+    font-family: 'Nunito', sans-serif;
+    font-size: 1rem;
+    color: rgba(255, 230, 180, 0.85);
+    font-weight: 600;
+    font-style: italic;
+    line-height: 1.8;
+    white-space: pre-line;
+    text-align: center;
+}
+
+.shineBtn {
+    background: linear-gradient(135deg, #ff8c00, #ffd700);
+    color: #2a1500;
+    border: none;
+    padding: 14px 32px;
+    border-radius: 30px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 5px 25px rgba(255, 215, 0, 0.35);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    z-index: 5;
+    animation: fadeIn 0.5s ease 0.3s both;
+}
+
+.shineBtn:active {
+    transform: scale(0.95);
+}
+
+.shineBtn:hover {
+    box-shadow: 0 8px 30px rgba(255, 215, 0, 0.5);
+    transform: translateY(-2px);
+}
+
+/* Final Sparkle Explosion */
+.finalSparkleOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.finalSparkleParticle {
+    position: absolute;
+    font-size: 1.5rem;
+    animation: finalBurst 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes finalBurst {
+    0% {
+        opacity: 1;
+        transform: translate(0, 0) scale(0.5);
+    }
+    70% {
+        opacity: 0.8;
+    }
+    100% {
+        opacity: 0;
+        transform: translate(var(--fsp-x), var(--fsp-y)) scale(1.2);
+    }
+}
+
+/* ---- Fairy Quest Responsive ---- */
+@media (max-width: 600px) {
+    .fairyTitle {
+        font-size: 1.25rem;
+    }
+
+    .fairyTitleSm {
+        font-size: 1.05rem;
+    }
+
+    .starField {
+        height: 240px;
+    }
+
+    .spellSlot {
+        width: 42px;
+        height: 48px;
+        font-size: 1.2rem;
+    }
+
+    .anagramSlot {
+        width: 42px;
+        height: 48px;
+        font-size: 1.2rem;
+    }
+
+    .anagramTile {
+        width: 46px;
+        height: 50px;
+        font-size: 1.15rem;
+    }
+
+    .stellaMessageCard {
+        padding: 20px 16px;
+    }
+
+    .solariaContainer {
+        width: 100px;
+        height: 100px;
+    }
+}
+
+@media (max-width: 380px) {
+    .fairyTitle {
+        font-size: 1.1rem;
+    }
+
+    .fairyTitleSm {
+        font-size: 0.95rem;
+    }
+
+    .starField {
+        height: 200px;
+    }
+
+    .spellSlot {
+        width: 36px;
+        height: 42px;
+    }
+
+    .anagramSlot {
+        width: 36px;
+        height: 42px;
+    }
+
+    .anagramTile {
+        width: 40px;
+        height: 44px;
+    }
+
+    .solariaContainer {
+        width: 85px;
+        height: 85px;
+    }
 }
