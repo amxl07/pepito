@@ -895,68 +895,27 @@ function CelebrationLevel({ onComplete }) {
 }
 
 // ═══════════════════════════════════════════
-//  LEVEL 9 — FINAL SURPRISE COUNTDOWN
+//  LEVEL 9 — FAIRY GATE (TRANSITION)
 // ═══════════════════════════════════════════
 
-function SurpriseLevel({ onComplete }) {
-    const [showCountdown, setShowCountdown] = useState(false);
-    const [timeLeft, setTimeLeft] = useState("");
-    const completedRef = useRef(false);
+function FairyGateLevel({ onComplete }) {
+    const [visible, setVisible] = useState(false);
+    const [showBtn, setShowBtn] = useState(false);
 
     useEffect(() => {
-        const timer = setTimeout(() => setShowCountdown(true), 3500);
-        return () => clearTimeout(timer);
+        setTimeout(() => setVisible(true), 400);
+        setTimeout(() => setShowBtn(true), 3000);
     }, []);
 
-    useEffect(() => {
-        if (!showCountdown) return;
-
-        const target = new Date();
-        target.setHours(23, 11, 0, 0); // 11:11 PM
-
-        // If already past 11:11 PM, countdown is done — go straight to next level
-        if (new Date() > target) {
-            setTimeLeft("00:00:00");
-            if (onComplete && !completedRef.current) {
-                completedRef.current = true;
-                setTimeout(onComplete, 2000);
-            }
-            return;
-        }
-
-        const interval = setInterval(() => {
-            const now = new Date();
-            const diff = target - now;
-
-            if (diff <= 0) {
-                setTimeLeft("00:00:00");
-                clearInterval(interval);
-                if (onComplete && !completedRef.current) {
-                    completedRef.current = true;
-                    setTimeout(onComplete, 2000);
-                }
-                return;
-            }
-
-            const h = Math.floor(diff / (1000 * 60 * 60));
-            const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            const s = Math.floor((diff % (1000 * 60)) / 1000);
-
-            setTimeLeft(`${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`);
-        }, 1000);
-
-        return () => clearInterval(interval);
-    }, [showCountdown]);
-
     return (
-        <div className={styles.surpriseWrap}>
-            {!showCountdown ? (
-                <h1 className={styles.surpriseText}>One more surprise is waiting for you... 🤫</h1>
-            ) : (
-                <>
-                    <h1 className={styles.surpriseText}>Open this at 11:11 PM ✨</h1>
-                    <div className={styles.countdown}>{timeLeft}</div>
-                </>
+        <div className={`${styles.surpriseWrap} ${visible ? styles.introVisible : ""}`}>
+            <div className={styles.fairyGateEmoji}>🧚‍♀️</div>
+            <h1 className={styles.surpriseText}>The surprise is ready...</h1>
+            <p className={styles.fairyGateSub}>A magical world is waiting for you, Pepito ✨</p>
+            {showBtn && (
+                <button className={styles.fairyGateBtn} onClick={onComplete}>
+                    Take me to the Fairy World 🦋
+                </button>
             )}
         </div>
     );
@@ -966,40 +925,74 @@ function SurpriseLevel({ onComplete }) {
 //  LEVEL 10 — FAIRY QUEST (WINX CLUB PUZZLE)
 // ═══════════════════════════════════════════
 
-const FAIRY_RIDDLES = [
-    "I hold something sweet, named after a gem so red...",
-    "Lift the first layer, look underneath...",
-    "Among many stars, only some carry the spell...",
+const SEARCH_STEPS = [
+    { dialogue: "Did you get my chocolates? 🍫", button: "Yes! 😍", buttonDelay: 1500 },
+    { dialogue: "Good... but it isn't just a box. One box has a key to your favorite Fairy World...", button: "Which is it? 🤔", buttonDelay: 2500 },
+    { dialogue: "I hold something sweet, named after a gem so red... 💎", button: "Ruby! I found it! ❤️", buttonDelay: 2000 },
+    { dialogue: "Now open Ruby carefully... lift the first layer...", button: "I lifted it!", buttonDelay: 3000 },
+    { dialogue: "Look underneath... what do you see? 👀", button: "I see something! ✨", buttonDelay: 2000 },
+    { dialogue: "Stars! But not all stars are the same... ⭐ Some carry letters...", button: "I found letters! 📝", buttonDelay: 2500 },
+    { dialogue: "Among many stars, only some carry the spell... ✨", button: null, buttonDelay: 2500 },
 ];
+
+const SPARKLE_STEPS = [2, 4, 5, 6];
 
 const TECNA_LETTERS = ["T", "E", "C", "N", "A"];
 
-const STELLA_MESSAGE = `You found Tecna's spell! But here's the real magic...
+const STELLA_DIALOGUES = [
+    "Hey! I'm Stella, Fairy of the Sun and Moon ☀️",
+    "Someone who loves you very much asked me to deliver a message...",
+    "But first, help me power up my Ring of Solaria! 💍",
+];
 
+const REVEAL_MESSAGE = `You found Tecna's spell! But here's the real magic...
 Just like Stella is the brightest fairy in the Winx Club,
 You are the brightest light in my universe.
+My Stella. My star. My sun. My shining sun. ☀️`;
 
-My Stella. My star. My sun. My shining sun.`;
+const RING_STAR_COUNT = 8;
+const FINALE_EMOJIS = ["⭐", "✨", "☀️", "👑", "💍", "🌟", "⚡"];
 
 function FairyQuestLevel() {
     const [phase, setPhase] = useState(1);
-    const [riddleIdx, setRiddleIdx] = useState(0);
+    const [visible, setVisible] = useState(false);
+    const [sparkles, setSparkles] = useState([]);
+    const [matrixActive, setMatrixActive] = useState(false);
+
+    // Phase 1: Search dialogue state
+    const [searchStep, setSearchStep] = useState(0);
+    const [searchTypeText, setSearchTypeText] = useState("");
+    const [searchTypeDone, setSearchTypeDone] = useState(false);
+    const [showButton, setShowButton] = useState(false);
+
+    // Phase 2: Star field state (unchanged)
     const [foundLetters, setFoundLetters] = useState([]);
     const [activeStars, setActiveStars] = useState([]);
     const [inputLetter, setInputLetter] = useState("");
     const [showInput, setShowInput] = useState(false);
     const [tappedStarIdx, setTappedStarIdx] = useState(null);
+
+    // Phase 3: Anagram state (unchanged)
     const [anagramTiles, setAnagramTiles] = useState([]);
     const [anagramSelected, setAnagramSelected] = useState([]);
     const [anagramShake, setAnagramShake] = useState(false);
     const [wrongAttempts, setWrongAttempts] = useState(0);
     const [anagramSolved, setAnagramSolved] = useState(false);
-    const [stellaText, setStellaText] = useState("");
-    const [stellaDone, setStellaDone] = useState(false);
-    const [visible, setVisible] = useState(false);
-    const [sparkles, setSparkles] = useState([]);
-    const [matrixActive, setMatrixActive] = useState(false);
-    const [finalSparkle, setFinalSparkle] = useState(false);
+
+    // Phase 4: Stella sub-phases
+    const [subPhase, setSubPhase] = useState("stellaAppears");
+    const [stellaDialogIdx, setStellaDialogIdx] = useState(0);
+    const [stellaTypeText, setStellaTypeText] = useState("");
+    const [stellaTypeDone, setStellaTypeDone] = useState(false);
+    const [ringStarsLit, setRingStarsLit] = useState([]);
+    const [ringPower, setRingPower] = useState(0);
+    const [ringBurst, setRingBurst] = useState(false);
+    const [revealText, setRevealText] = useState("");
+    const [revealDone, setRevealDone] = useState(false);
+    const [showFlash, setShowFlash] = useState(false);
+    const [explosion, setExplosion] = useState([]);
+    const [finaleActive, setFinaleActive] = useState(false);
+    const [showGoodbye, setShowGoodbye] = useState(false);
 
     // Stars for Phase 2
     const [stars] = useState(() =>
@@ -1013,45 +1006,178 @@ function FairyQuestLevel() {
         }))
     );
 
+    // Ring star positions (8 stars in a circle)
+    const [ringStarPositions] = useState(() =>
+        Array.from({ length: RING_STAR_COUNT }, (_, i) => {
+            const angle = (i / RING_STAR_COUNT) * Math.PI * 2 - Math.PI / 2;
+            return {
+                x: 50 + Math.cos(angle) * 38,
+                y: 50 + Math.sin(angle) * 38,
+            };
+        })
+    );
+
+    // Pre-generated fairy dust particles (phases 1-3)
+    const [fairyDust] = useState(() =>
+        Array.from({ length: 20 }, (_, i) => ({
+            id: i,
+            left: Math.random() * 100,
+            delay: Math.random() * 6,
+            dur: 5 + Math.random() * 5,
+            size: 3 + Math.random() * 5,
+        }))
+    );
+
+    // Pre-generated golden stars (phase 4 background)
+    const [goldenStars] = useState(() =>
+        Array.from({ length: 15 }, (_, i) => ({
+            id: i,
+            left: Math.random() * 100,
+            delay: Math.random() * 5,
+            dur: 6 + Math.random() * 4,
+        }))
+    );
+
+    // Pre-generated keepsake floating stars (phase 4D)
+    const [keepsakeStars] = useState(() =>
+        Array.from({ length: 20 }, (_, i) => ({
+            id: i,
+            left: Math.random() * 100,
+            delay: Math.random() * 6,
+            dur: 5 + Math.random() * 5,
+            size: 0.6 + Math.random() * 0.8,
+            emoji: ["⭐", "✨", "🌟"][i % 3],
+        }))
+    );
+
     useEffect(() => {
         setTimeout(() => setVisible(true), 300);
     }, []);
 
-    // Phase 4 typewriter effect
+    // Phase 1: Typewriter effect for search dialogue
     useEffect(() => {
-        if (phase !== 4) return;
+        if (phase !== 1) return;
+        const step = SEARCH_STEPS[searchStep];
+        if (!step) return;
+
+        setSearchTypeText("");
+        setSearchTypeDone(false);
+        setShowButton(false);
+
         let idx = 0;
         const timer = setInterval(() => {
             idx++;
-            setStellaText(STELLA_MESSAGE.slice(0, idx));
-            if (idx >= STELLA_MESSAGE.length) {
+            setSearchTypeText(step.dialogue.slice(0, idx));
+            if (idx >= step.dialogue.length) {
                 clearInterval(timer);
-                setStellaDone(true);
+                setSearchTypeDone(true);
             }
         }, 35);
         return () => clearInterval(timer);
+    }, [phase, searchStep]);
+
+    // Phase 1: Show button after typewriter + delay
+    useEffect(() => {
+        if (!searchTypeDone || phase !== 1) return;
+        const step = SEARCH_STEPS[searchStep];
+        if (!step) return;
+
+        // Last step: auto-transition to Phase 2
+        if (step.button === null) {
+            const t = setTimeout(() => setPhase(2), step.buttonDelay);
+            return () => clearTimeout(t);
+        }
+
+        const t = setTimeout(() => setShowButton(true), step.buttonDelay);
+        return () => clearTimeout(t);
+    }, [searchTypeDone, searchStep, phase]);
+
+    // Phase 4A: Stella dialogues typewriter
+    useEffect(() => {
+        if (phase !== 4 || subPhase !== "stellaAppears") return;
+        const text = STELLA_DIALOGUES[stellaDialogIdx];
+        if (!text) return;
+
+        setStellaTypeText("");
+        setStellaTypeDone(false);
+
+        let idx = 0;
+        const timer = setInterval(() => {
+            idx++;
+            setStellaTypeText(text.slice(0, idx));
+            if (idx >= text.length) {
+                clearInterval(timer);
+                setStellaTypeDone(true);
+            }
+        }, 35);
+        return () => clearInterval(timer);
+    }, [phase, subPhase, stellaDialogIdx]);
+
+    // Phase 4A: Auto-advance Stella dialogues
+    useEffect(() => {
+        if (phase !== 4 || subPhase !== "stellaAppears" || !stellaTypeDone) return;
+        if (stellaDialogIdx < STELLA_DIALOGUES.length - 1) {
+            const t = setTimeout(() => {
+                setStellaDialogIdx((prev) => prev + 1);
+                setStellaTypeDone(false);
+            }, 1200);
+            return () => clearTimeout(t);
+        }
+    }, [phase, subPhase, stellaTypeDone, stellaDialogIdx]);
+
+    // Phase 4C: Grand reveal typewriter
+    useEffect(() => {
+        if (phase !== 4 || subPhase !== "grandReveal") return;
+
+        setRevealText("");
+        setRevealDone(false);
+
+        let idx = 0;
+        const timer = setInterval(() => {
+            idx++;
+            setRevealText(REVEAL_MESSAGE.slice(0, idx));
+            if (idx >= REVEAL_MESSAGE.length) {
+                clearInterval(timer);
+                setRevealDone(true);
+            }
+        }, 35);
+        return () => clearInterval(timer);
+    }, [phase, subPhase]);
+
+    // Phase 4 entry: Golden flash
+    useEffect(() => {
+        if (phase !== 4) return;
+        setShowFlash(true);
+        const t = setTimeout(() => setShowFlash(false), 1200);
+        return () => clearTimeout(t);
     }, [phase]);
 
-    // Phase 1: Advance riddle
-    const foundIt = () => {
-        if (window.navigator?.vibrate) window.navigator.vibrate(25);
-        // Sparkle burst
-        const newSparkles = Array.from({ length: 12 }, (_, i) => ({
-            id: Date.now() + i,
-            x: 40 + Math.random() * 20,
-            y: 40 + Math.random() * 20,
-        }));
-        setSparkles(newSparkles);
-        setTimeout(() => setSparkles([]), 1000);
+    // Phase 4D: Show goodbye note below keepsake
+    useEffect(() => {
+        if (!finaleActive) return;
+        const t = setTimeout(() => setShowGoodbye(true), 4000);
+        return () => clearTimeout(t);
+    }, [finaleActive]);
 
-        if (riddleIdx + 1 < FAIRY_RIDDLES.length) {
-            setRiddleIdx((prev) => prev + 1);
-        } else {
-            setTimeout(() => setPhase(2), 800);
+    // Phase 1: Advance search step
+    const advanceSearch = () => {
+        if (window.navigator?.vibrate) window.navigator.vibrate(25);
+
+        // Sparkle burst on certain steps
+        if (SPARKLE_STEPS.includes(searchStep)) {
+            const newSparkles = Array.from({ length: 12 }, (_, i) => ({
+                id: Date.now() + i,
+                x: 40 + Math.random() * 20,
+                y: 40 + Math.random() * 20,
+            }));
+            setSparkles(newSparkles);
+            setTimeout(() => setSparkles([]), 1000);
         }
+
+        setSearchStep((prev) => prev + 1);
     };
 
-    // Phase 2: Tap star
+    // Phase 2: Tap star (unchanged)
     const tapStar = (starIdx) => {
         if (activeStars.includes(starIdx) || foundLetters.length >= 5 || showInput) return;
         if (window.navigator?.vibrate) window.navigator.vibrate(15);
@@ -1060,7 +1186,7 @@ function FairyQuestLevel() {
         setInputLetter("");
     };
 
-    // Phase 2: Submit letter
+    // Phase 2: Submit letter (unchanged)
     const submitLetter = () => {
         const letter = inputLetter.toUpperCase().trim();
         if (!letter) return;
@@ -1075,13 +1201,11 @@ function FairyQuestLevel() {
 
             if (newFound.length >= 5) {
                 setTimeout(() => {
-                    // Shuffle letters for anagram
                     const shuffled = [...newFound];
                     for (let i = shuffled.length - 1; i > 0; i--) {
                         const j = Math.floor(Math.random() * (i + 1));
                         [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
                     }
-                    // Avoid correct order by chance
                     if (shuffled.join("") === "TECNA") {
                         [shuffled[0], shuffled[1]] = [shuffled[1], shuffled[0]];
                     }
@@ -1096,7 +1220,7 @@ function FairyQuestLevel() {
         }
     };
 
-    // Phase 3: Tap anagram tile
+    // Phase 3: Tap anagram tile — now transitions to stellaAppears
     const tapAnagramTile = (idx) => {
         if (anagramSelected.includes(idx) || anagramSolved) return;
         if (window.navigator?.vibrate) window.navigator.vibrate(15);
@@ -1109,10 +1233,10 @@ function FairyQuestLevel() {
             if (built === "TECNA") {
                 setAnagramSolved(true);
                 if (window.navigator?.vibrate) window.navigator.vibrate([50, 30, 100]);
-                // Matrix rain + transition to Phase 4
                 setMatrixActive(true);
                 setTimeout(() => {
                     setMatrixActive(false);
+                    setSubPhase("stellaAppears");
                     setPhase(4);
                 }, 2000);
             } else {
@@ -1127,24 +1251,81 @@ function FairyQuestLevel() {
         }
     };
 
-    // Phase 4: Final sparkle button
-    const triggerFinalSparkle = () => {
-        if (window.navigator?.vibrate) window.navigator.vibrate([50, 30, 50, 30, 100]);
-        setFinalSparkle(true);
+    // Phase 4B: Tap ring star
+    const tapRingStar = (idx) => {
+        if (ringStarsLit.includes(idx) || ringBurst) return;
+        if (window.navigator?.vibrate) window.navigator.vibrate(25);
+
+        const newLit = [...ringStarsLit, idx];
+        setRingStarsLit(newLit);
+        setRingPower((newLit.length / RING_STAR_COUNT) * 100);
+
+        if (newLit.length === RING_STAR_COUNT) {
+            if (window.navigator?.vibrate) window.navigator.vibrate([50, 30, 50, 30, 100]);
+            setRingBurst(true);
+            setShowFlash(true);
+            setTimeout(() => setShowFlash(false), 1200);
+            setTimeout(() => {
+                setSubPhase("grandReveal");
+            }, 1500);
+        }
     };
+
+    // Phase 4D: Trigger finale
+    const triggerFinale = () => {
+        if (window.navigator?.vibrate) window.navigator.vibrate([100, 50, 100, 50, 300]);
+
+        const parts = Array.from({ length: 30 }, (_, i) => {
+            const a = (i / 30) * Math.PI * 2;
+            const d = 140 + Math.random() * 240;
+            return {
+                id: i,
+                emoji: FINALE_EMOJIS[i % FINALE_EMOJIS.length],
+                ex: `${Math.cos(a) * d}px`,
+                ey: `${Math.sin(a) * d}px`,
+                er: `${(Math.random() - 0.5) * 720}deg`,
+                fs: `${1.5 + Math.random() * 1.5}rem`,
+            };
+        });
+        setExplosion(parts);
+        setShowFlash(true);
+        setTimeout(() => setShowFlash(false), 1200);
+        setTimeout(() => {
+            setExplosion([]);
+            setFinaleActive(true);
+        }, 1800);
+    };
+
+    const ringCirc = 2 * Math.PI * 45;
+    const ringDashOffset = ringCirc - (ringPower / 100) * ringCirc;
 
     return (
         <div className={`${phase === 4 ? styles.fairyWrapStella : styles.fairyWrap} ${visible ? styles.fairyVisible : ""}`}>
+            {/* Golden flash overlay */}
+            {showFlash && <div className={styles.goldenFlash} />}
+
+            {/* Explosion overlay */}
+            {explosion.length > 0 && (
+                <div className={styles.explosionLayer}>
+                    {explosion.map((ep) => (
+                        <div key={ep.id} className={styles.explosionPart}
+                            style={{ "--ex": ep.ex, "--ey": ep.ey, "--er": ep.er, fontSize: ep.fs }}>
+                            {ep.emoji}
+                        </div>
+                    ))}
+                </div>
+            )}
+
             {/* Fairy dust particles for phases 1-3 */}
             {phase < 4 && (
                 <div className={styles.fairyDustLayer}>
-                    {Array.from({ length: 20 }, (_, i) => (
-                        <span key={i} className={styles.fairyDustParticle}
+                    {fairyDust.map((p) => (
+                        <span key={p.id} className={styles.fairyDustParticle}
                             style={{
-                                left: `${Math.random() * 100}%`,
-                                "--fd-delay": `${Math.random() * 6}s`,
-                                "--fd-dur": `${5 + Math.random() * 5}s`,
-                                "--fd-size": `${3 + Math.random() * 5}px`,
+                                left: `${p.left}%`,
+                                "--fd-delay": `${p.delay}s`,
+                                "--fd-dur": `${p.dur}s`,
+                                "--fd-size": `${p.size}px`,
                             }} />
                     ))}
                 </div>
@@ -1178,28 +1359,36 @@ function FairyQuestLevel() {
                 </div>
             )}
 
-            {/* ═══════ PHASE 1: Riddles ═══════ */}
+            {/* ═══════ PHASE 1: The Search (Conversational Dialogue) ═══════ */}
             {phase === 1 && (
                 <div className={styles.fairyPhase}>
                     <div className={styles.butterflyWings}>🦋</div>
                     <h2 className={styles.fairyTitle}>A fairy has hidden a secret in your world...</h2>
-                    <div className={styles.riddleCard}>
-                        <p className={styles.riddleText}>
-                            {FAIRY_RIDDLES[riddleIdx]}
-                        </p>
-                        <div className={styles.riddleDots}>
-                            {FAIRY_RIDDLES.map((_, i) => (
-                                <div key={i} className={`${styles.riddleDot} ${i <= riddleIdx ? styles.riddleDotActive : ""}`} />
-                            ))}
+
+                    <div className={styles.dialogueBubble}>
+                        <div className={styles.dialogueAvatar}>✨</div>
+                        <div className={styles.dialogueText}>
+                            {searchTypeText}
+                            {!searchTypeDone && <span className={styles.cursor}>|</span>}
                         </div>
                     </div>
-                    <button className={styles.fairyBtn} onClick={foundIt}>
-                        I found it! ✨
-                    </button>
+
+                    {showButton && SEARCH_STEPS[searchStep]?.button && (
+                        <button className={styles.searchResponseBtn} onClick={advanceSearch}>
+                            {SEARCH_STEPS[searchStep].button}
+                        </button>
+                    )}
+
+                    {/* Progress dots */}
+                    <div className={styles.riddleDots}>
+                        {SEARCH_STEPS.map((_, i) => (
+                            <div key={i} className={`${styles.riddleDot} ${i <= searchStep ? styles.riddleDotActive : ""}`} />
+                        ))}
+                    </div>
                 </div>
             )}
 
-            {/* ═══════ PHASE 2: Star Field ═══════ */}
+            {/* ═══════ PHASE 2: Star Field (unchanged) ═══════ */}
             {phase === 2 && (
                 <div className={styles.fairyPhase}>
                     <h2 className={styles.fairyTitleSm}>Search the stars in your hands...</h2>
@@ -1226,7 +1415,6 @@ function FairyQuestLevel() {
                         })}
                     </div>
 
-                    {/* Letter input popup */}
                     {showInput && (
                         <div className={styles.letterInputOverlay}>
                             <div className={styles.letterInputCard}>
@@ -1252,7 +1440,6 @@ function FairyQuestLevel() {
                         </div>
                     )}
 
-                    {/* Spell bar (letter slots) */}
                     <div className={styles.spellBar}>
                         {TECNA_LETTERS.map((_, i) => (
                             <div key={i} className={`${styles.spellSlot} ${foundLetters[i] ? styles.spellSlotFilled : ""}`}>
@@ -1265,12 +1452,11 @@ function FairyQuestLevel() {
                 </div>
             )}
 
-            {/* ═══════ PHASE 3: Anagram Puzzle ═══════ */}
+            {/* ═══════ PHASE 3: Anagram Puzzle (unchanged, transitions to Phase 4) ═══════ */}
             {phase === 3 && (
                 <div className={styles.fairyPhase}>
                     <h2 className={styles.fairyTitleSm}>Unscramble the letters to reveal a Winx fairy&apos;s name!</h2>
 
-                    {/* Answer slots */}
                     <div className={styles.anagramAnswer}>
                         {Array.from({ length: 5 }, (_, i) => (
                             <div key={i} className={`${styles.anagramSlot} ${anagramSelected[i] !== undefined ? styles.anagramSlotFilled : ""}`}>
@@ -1279,7 +1465,6 @@ function FairyQuestLevel() {
                         ))}
                     </div>
 
-                    {/* Tile row */}
                     <div className={`${styles.anagramTiles} ${anagramShake ? styles.shake : ""}`}>
                         {anagramTiles.map((letter, i) => (
                             <button key={i}
@@ -1303,84 +1488,158 @@ function FairyQuestLevel() {
                 </div>
             )}
 
-            {/* ═══════ PHASE 4: Stella Celebration ═══════ */}
+            {/* ═══════ PHASE 4: Stella's World ═══════ */}
             {phase === 4 && (
-                <div className={styles.stellaPhase}>
-                    {/* Sun burst background */}
+                <>
+                    {/* Sun burst background (all sub-phases) */}
                     <div className={styles.sunBurst}>
                         {Array.from({ length: 12 }, (_, i) => (
                             <div key={i} className={styles.sunRay} style={{ "--ray-angle": `${i * 30}deg` }} />
                         ))}
                     </div>
 
-                    {/* Floating golden stars */}
+                    {/* Floating golden stars (all sub-phases) */}
                     <div className={styles.goldenStarsLayer}>
-                        {Array.from({ length: 15 }, (_, i) => (
-                            <span key={i} className={styles.goldenStar}
+                        {goldenStars.map((gs) => (
+                            <span key={gs.id} className={styles.goldenStar}
                                 style={{
-                                    left: `${Math.random() * 100}%`,
-                                    "--gs-delay": `${Math.random() * 5}s`,
-                                    "--gs-dur": `${6 + Math.random() * 4}s`,
+                                    left: `${gs.left}%`,
+                                    "--gs-delay": `${gs.delay}s`,
+                                    "--gs-dur": `${gs.dur}s`,
                                 }}>
                                 ⭐
                             </span>
                         ))}
                     </div>
 
-                    {/* Ring of Solaria SVG */}
-                    <div className={styles.solariaContainer}>
-                        <svg className={styles.solariaSvg} viewBox="0 0 120 120">
-                            <defs>
-                                <linearGradient id="solariaGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" stopColor="#ffd700" />
-                                    <stop offset="50%" stopColor="#ff8c00" />
-                                    <stop offset="100%" stopColor="#ffd700" />
-                                </linearGradient>
-                            </defs>
-                            <circle cx="60" cy="60" r="45" fill="none" stroke="url(#solariaGrad)" strokeWidth="3"
-                                className={styles.solariaRing} />
-                            <circle cx="60" cy="60" r="38" fill="none" stroke="url(#solariaGrad)" strokeWidth="1.5"
-                                opacity="0.5" className={styles.solariaRingInner} />
-                            {/* Sun symbol in center */}
-                            <text x="60" y="65" textAnchor="middle" fontSize="28" className={styles.solariaSun}>
-                                ☀️
-                            </text>
-                        </svg>
-                    </div>
+                    {/* ─── Sub-Phase A: Stella Appears ─── */}
+                    {subPhase === "stellaAppears" && (
+                        <div className={styles.stellaPhase}>
+                            <div className={styles.stellaAvatar}>
+                                <span className={styles.stellaCrown}>👑</span>
+                                <span className={styles.stellaSun}>☀️</span>
+                                <div className={styles.stellaAura} />
+                            </div>
 
-                    <p className={styles.stellaQuote}>Winx is your magical identity...</p>
+                            <div className={styles.dialogueBubble}>
+                                <div className={styles.dialogueText}>
+                                    {stellaTypeText}
+                                    {!stellaTypeDone && <span className={styles.cursor}>|</span>}
+                                </div>
+                            </div>
 
-                    <div className={styles.stellaMessageCard}>
-                        <div className={styles.stellaMessageBody}>
-                            {stellaText}
-                            {!stellaDone && <span className={styles.cursor}>|</span>}
-                        </div>
-                    </div>
-
-                    {stellaDone && !finalSparkle && (
-                        <button className={styles.shineBtn} onClick={triggerFinalSparkle}>
-                            Shine Forever ✨
-                        </button>
-                    )}
-
-                    {finalSparkle && (
-                        <div className={styles.finalSparkleOverlay}>
-                            {Array.from({ length: 30 }, (_, i) => {
-                                const a = (i / 30) * Math.PI * 2;
-                                const d = 100 + Math.random() * 200;
-                                return (
-                                    <span key={i} className={styles.finalSparkleParticle}
-                                        style={{
-                                            "--fsp-x": `${Math.cos(a) * d}px`,
-                                            "--fsp-y": `${Math.sin(a) * d}px`,
-                                        }}>
-                                        {["✨", "⭐", "💛", "☀️", "🌟"][i % 5]}
-                                    </span>
-                                );
-                            })}
+                            {stellaTypeDone && stellaDialogIdx === STELLA_DIALOGUES.length - 1 && (
+                                <button className={styles.shineBtn} onClick={() => setSubPhase("powerRing")}>
+                                    Help Stella! ✨
+                                </button>
+                            )}
                         </div>
                     )}
-                </div>
+
+                    {/* ─── Sub-Phase B: Power the Ring ─── */}
+                    {subPhase === "powerRing" && (
+                        <div className={styles.stellaPhase}>
+                            <div className={styles.ringSvgLarge}>
+                                <svg viewBox="0 0 100 100" className={styles.goldenRingBg}>
+                                    <defs>
+                                        <linearGradient id="goldRingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                            <stop offset="0%" stopColor="#ffd700" />
+                                            <stop offset="50%" stopColor="#ff8c00" />
+                                            <stop offset="100%" stopColor="#ffd700" />
+                                        </linearGradient>
+                                    </defs>
+                                    <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,215,0,0.15)" strokeWidth="4" />
+                                    <circle cx="50" cy="50" r="45" fill="none" stroke="url(#goldRingGrad)" strokeWidth="4"
+                                        strokeLinecap="round" className={styles.goldenRingFill}
+                                        strokeDasharray={ringCirc} strokeDashoffset={ringDashOffset}
+                                        style={{ transform: "rotate(-90deg)", transformOrigin: "50px 50px" }} />
+                                    <text x="50" y="55" textAnchor="middle" fontSize="20" className={styles.ringSunCenter}>
+                                        ☀️
+                                    </text>
+                                </svg>
+
+                                {/* 8 stars around the ring */}
+                                {ringStarPositions.map((pos, i) => (
+                                    <div key={i}
+                                        className={`${styles.ringStarDim} ${ringStarsLit.includes(i) ? styles.ringStarLit : ""} ${ringBurst ? styles.ringStarPulse : ""}`}
+                                        onClick={() => tapRingStar(i)}
+                                        style={{ left: `${pos.x}%`, top: `${pos.y}%` }}>
+                                        ⭐
+                                    </div>
+                                ))}
+                            </div>
+
+                            <p className={styles.ringProgress}>
+                                {ringStarsLit.length} / {RING_STAR_COUNT} stars powered
+                            </p>
+                        </div>
+                    )}
+
+                    {/* ─── Sub-Phase C: Grand Reveal ─── */}
+                    {subPhase === "grandReveal" && (
+                        <div className={styles.stellaRevealWrap}>
+                            <div className={styles.stellaAvatar} style={{ transform: "scale(0.7)" }}>
+                                <span className={styles.stellaCrown}>👑</span>
+                                <span className={styles.stellaSun}>☀️</span>
+                                <div className={styles.stellaAura} />
+                            </div>
+
+                            <div className={styles.goldenMessageCard}>
+                                <div className={styles.goldenMessageBody}>
+                                    {revealText}
+                                    {!revealDone && <span className={styles.goldenCursor}>|</span>}
+                                </div>
+                            </div>
+
+                            {revealDone && (
+                                <button className={styles.shineForeverBtn} onClick={triggerFinale}>
+                                    Shine Forever ✨
+                                </button>
+                            )}
+                        </div>
+                    )}
+
+                    {/* ─── Sub-Phase D: Grand Finale (Keepsake) ─── */}
+                    {subPhase === "finale" || finaleActive ? (
+                        <div className={styles.keepsakeWrap}>
+                            <div className={styles.keepsakeRing}>
+                                <svg viewBox="0 0 120 120" className={styles.keepsakeRingSvg}>
+                                    <defs>
+                                        <linearGradient id="keepsakeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                            <stop offset="0%" stopColor="#ffd700" />
+                                            <stop offset="50%" stopColor="#ff8c00" />
+                                            <stop offset="100%" stopColor="#ffd700" />
+                                        </linearGradient>
+                                    </defs>
+                                    <circle cx="60" cy="60" r="45" fill="none" stroke="url(#keepsakeGrad)"
+                                        strokeWidth="3" strokeDasharray="8 4" className={styles.keepsakeRingCircle} />
+                                    <text x="60" y="66" textAnchor="middle" fontSize="28" className={styles.keepsakeRingSun}>
+                                        ☀️
+                                    </text>
+                                </svg>
+                            </div>
+
+                            <h1 className={styles.keepsakeTitle}>Forever My Stella ☀️</h1>
+
+                            {showGoodbye && (
+                                <p className={styles.goodbyeNote}>Until Next Time 💛</p>
+                            )}
+
+                            {/* Floating keepsake stars */}
+                            {keepsakeStars.map((ks) => (
+                                <span key={ks.id} className={styles.keepsakeFloatStar}
+                                    style={{
+                                        left: `${ks.left}%`,
+                                        "--ks-delay": `${ks.delay}s`,
+                                        "--ks-dur": `${ks.dur}s`,
+                                        fontSize: `${ks.size}rem`,
+                                    }}>
+                                    {ks.emoji}
+                                </span>
+                            ))}
+                        </div>
+                    ) : null}
+                </>
             )}
         </div>
     );
@@ -1456,7 +1715,7 @@ export default function Day8() {
                 {level === 6 && <HeartCatchLevel onComplete={nextLevel} />}
                 {level === 7 && <RunawayLevel onComplete={nextLevel} />}
                 {level === 8 && <CelebrationLevel onComplete={nextLevel} />}
-                {level === 9 && <SurpriseLevel onComplete={nextLevel} />}
+                {level === 9 && <FairyGateLevel onComplete={nextLevel} />}
                 {level === 10 && <FairyQuestLevel />}
             </div>
         </div>
